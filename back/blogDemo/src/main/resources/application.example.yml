@@ -1,0 +1,77 @@
+# ============================================================
+# 配置模板
+# 用法：复制本文件为 application.yml，把密码改成你自己的
+# application.yml 已加入 .gitignore，不会进入版本库
+# ============================================================
+
+server:
+  port: 8080
+
+  servlet:
+    session:
+      # 后台登录态有效期 12 小时
+      timeout: 12h
+      cookie:
+        # 禁止 JS 读取 cookie，防 XSS 偷走登录态
+        http-only: true
+        # Lax：跨站的 POST/PUT/DELETE 不携带 cookie（顶层 GET 跳转仍会带）
+        # 这是关闭 CSRF 校验后的兜底防线，不能完全替代 CSRF token
+        same-site: lax
+        # 本地是 http，必须 false；上线换成 https 后改成 true
+        secure: false
+
+spring:
+  application:
+    name: blogDemo
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # 库名必须和你在 MySQL 里建的一致
+    # 时区写死上海，避免存取时间差 8 小时
+    url: "jdbc:mysql://localhost:3306/my_blog?connectionTimeZone=Asia/Shanghai&characterEncoding=utf8&sslMode=DISABLED&allowPublicKeyRetrieval=true"
+    username: root
+    # TODO 改成你自己的 MySQL 密码
+    password: "改成你的 MySQL 密码"
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+
+  servlet:
+    multipart:
+      # 单张图片上限 5MB，一次请求（多图）上限 20MB
+      max-file-size: 5MB
+      max-request-size: 20MB
+
+  jackson:
+    # 接口返回的时间统一按上海时区
+    time-zone: Asia/Shanghai
+
+mybatis-plus:
+  # 手写的 SQL 放在 resources/mapper 下，按目录递归查找
+  mapper-locations: classpath*:/mapper/**/*.xml
+  # 实体类所在包，XML 里可以直接写类名，不用写全限定名
+  type-aliases-package: com.sangshen.entity
+  configuration:
+    # 数据库的 create_at 自动映射到实体的 createAt
+    map-underscore-to-camel-case: true
+    # 控制台打印真正执行的 SQL，上线前删掉这一行
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    banner: false
+    db-config:
+      # 主键交给数据库自增
+      id-type: auto
+
+# 自定义配置：图片存哪里、对外访问前缀
+# 后面写上传功能时用 @ConfigurationProperties 读它
+blog:
+  upload:
+    dir: ./uploads
+    url-prefix: /uploads
+
+logging:
+  level:
+    root: info
+    # 你自己的代码打 debug 日志，框架保持 info 不刷屏
+    com.sangshen: debug
