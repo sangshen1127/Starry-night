@@ -10,10 +10,10 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
-    //非法参数异常
+    //非法参数异常的全局捕捉
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Result> handle(IllegalArgumentException iae){
         log.error("非法参数异常：{}", iae.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Result.error(iae.getMessage()));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Result.error(iae.getMessage()));  //返回400的状态码
     }
 }

@@ -70,6 +70,11 @@ blog:
     dir: ./uploads
     url-prefix: /uploads
 
+  # 管理员初始账号：只在 users 表为空时用一次
+  admin:
+    username: admin
+    password: "改成你的初始密码"
+
 logging:
   level:
     root: info

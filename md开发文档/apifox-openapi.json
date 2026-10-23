@@ -1,0 +1,1110 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "个人博客 API",
+    "version": "0.2.0",
+    "description": "个人博客后端接口。导入方式：Apifox → 项目设置 → 导入数据 → OpenAPI/Swagger → 选择本文件。\n\n约定：code=1 成功，code=0 失败；失败原因看 HTTP 状态码与 message；时间格式 yyyy-MM-dd HH:mm:ss；后台接口需要先调用登录接口，Apifox 会自动保存 Cookie。"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "本地开发"
+    }
+  ],
+  "tags": [
+    { "name": "公共", "description": "匿名可访问" },
+    { "name": "认证", "description": "登录、登出、当前用户" },
+    { "name": "后台-文章", "description": "需要登录" },
+    { "name": "后台-评论", "description": "需要登录" },
+    { "name": "后台-友链", "description": "需要登录" },
+    { "name": "后台-其他", "description": "上传、统计" }
+  ],
+  "paths": {
+    "/api/posts": {
+      "get": {
+        "tags": ["公共"],
+        "summary": "文章列表",
+        "description": "只返回已发布文章，按发布时间倒序。不返回正文。",
+        "parameters": [
+          { "$ref": "#/components/parameters/Page" },
+          { "$ref": "#/components/parameters/Size" },
+          { "$ref": "#/components/parameters/Keyword" }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PostPageResult" },
+                "example": {
+                  "code": 1,
+                  "message": "success",
+                  "data": {
+                    "list": [
+                      {
+                        "id": 1,
+                        "title": "我的第一篇博客",
+                        "summary": "这是摘要",
+                        "coverUrl": null,
+                        "publishedAt": "2026-10-21 19:31:00",
+                        "viewCount": 0
+                      }
+                    ],
+                    "total": 1,
+                    "page": 1,
+                    "size": 10
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" }
+        }
+      }
+    },
+    "/api/posts/{id}": {
+      "get": {
+        "tags": ["公共"],
+        "summary": "文章详情",
+        "description": "草稿与不存在的 id 都返回 404。",
+        "parameters": [
+          { "$ref": "#/components/parameters/Id" }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PostDetailResult" },
+                "example": {
+                  "code": 1,
+                  "message": "success",
+                  "data": {
+                    "id": 1,
+                    "title": "我的第一篇博客",
+                    "summary": "这是摘要",
+                    "coverUrl": null,
+                    "content": "# 标题\n\n正文",
+                    "publishedAt": "2026-10-21 19:31:00",
+                    "updatedAt": "2026-10-21 19:31:00",
+                    "viewCount": 12,
+                    "commentCount": 2
+                  }
+                }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+    "/api/posts/{id}/comments": {
+      "get": {
+        "tags": ["公共"],
+        "summary": "某篇文章的评论列表",
+        "description": "只返回已通过审核的评论，不含邮箱与 IP。",
+        "parameters": [
+          { "$ref": "#/components/parameters/Id" },
+          { "$ref": "#/components/parameters/Page" },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "default": 20, "minimum": 1, "maximum": 50 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/CommentPageResult" }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+    "/api/comments": {
+      "post": {
+        "tags": ["公共"],
+        "summary": "提交评论",
+        "description": "游客可提交。入库状态为 pending，审核通过后才在前台展示。",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CommentCreateRequest" },
+              "example": {
+                "postId": 1,
+                "nickname": "小明",
+                "email": "ming@example.com",
+                "website": "https://example.com",
+                "content": "写得好"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "提交成功，等待审核",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/BaseResult" },
+                "example": {
+                  "code": 1,
+                  "message": "评论提交成功，审核通过后显示",
+                  "data": null
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "404": { "$ref": "#/components/responses/NotFound" },
+          "429": { "$ref": "#/components/responses/TooManyRequests" }
+        }
+      }
+    },
+    "/api/friend-links": {
+      "get": {
+        "tags": ["公共"],
+        "summary": "友链列表",
+        "description": "只返回 visible=1 的记录，按 sortOrder 升序。",
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/FriendLinkListResult" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/home": {
+      "get": {
+        "tags": ["公共"],
+        "summary": "首页聚合数据",
+        "description": "一次返回最新文章、最新评论、友链。",
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/HomeResult" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "tags": ["认证"],
+        "summary": "登录",
+        "description": "成功后服务端通过 Set-Cookie 下发 JSESSIONID。Apifox 默认会自动保存 Cookie。",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/LoginRequest" },
+              "example": { "username": "admin", "password": "你的密码" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "登录成功",
+            "headers": {
+              "Set-Cookie": {
+                "description": "JSESSIONID=...; HttpOnly; SameSite=Lax",
+                "schema": { "type": "string" }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UserInfoResult" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "429": { "$ref": "#/components/responses/TooManyRequests" }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "tags": ["认证"],
+        "summary": "登出",
+        "security": [{ "cookieAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "已退出",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/BaseResult" },
+                "example": { "code": 1, "message": "已退出登录", "data": null }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "tags": ["认证"],
+        "summary": "当前登录用户",
+        "security": [{ "cookieAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UserInfoResult" },
+                "example": {
+                  "code": 1,
+                  "message": "success",
+                  "data": { "id": 1, "username": "admin", "nickname": "站长" }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/api/admin/posts": {
+      "get": {
+        "tags": ["后台-文章"],
+        "summary": "后台文章列表",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/Page" },
+          { "$ref": "#/components/parameters/Size" },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "description": "不传为全部",
+            "schema": { "type": "string", "enum": ["draft", "published"] }
+          },
+          { "$ref": "#/components/parameters/Keyword" }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AdminPostPageResult" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      },
+      "post": {
+        "tags": ["后台-文章"],
+        "summary": "新建文章",
+        "security": [{ "cookieAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/PostUpsertRequest" },
+              "example": {
+                "title": "我的第一篇博客",
+                "summary": "这是摘要",
+                "coverUrl": null,
+                "content": "# 标题\n\n正文",
+                "status": "draft"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "创建成功",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/IdResult" },
+                "example": { "code": 1, "message": "创建成功", "data": { "id": 4 } }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/api/admin/posts/{id}": {
+      "get": {
+        "tags": ["后台-文章"],
+        "summary": "后台文章详情",
+        "description": "返回完整字段，含草稿。",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/Id" }],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PostDetailResult" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "put": {
+        "tags": ["后台-文章"],
+        "summary": "更新文章",
+        "description": "整体覆盖；status 不传则保持原值。",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/Id" }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/PostUpsertRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "保存成功",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/BaseResult" },
+                "example": { "code": 1, "message": "保存成功", "data": null }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "delete": {
+        "tags": ["后台-文章"],
+        "summary": "删除文章",
+        "description": "评论随外键级联删除。",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/Id" }],
+        "responses": {
+          "200": {
+            "description": "已删除",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/BaseResult" },
+                "example": { "code": 1, "message": "已删除", "data": null }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+    "/api/admin/posts/{id}/status": {
+      "patch": {
+        "tags": ["后台-文章"],
+        "summary": "发布 / 转草稿",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/Id" }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/PostStatusRequest" },
+              "example": { "status": "published" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "已更新",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/BaseResult" },
+                "example": { "code": 1, "message": "已发布", "data": null }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/api/admin/comments": {
+      "get": {
+        "tags": ["后台-评论"],
+        "summary": "后台评论列表",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/Page" },
+          { "$ref": "#/components/parameters/Size" },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "string", "enum": ["pending", "approved", "spam"] }
+          },
+          {
+            "name": "postId",
+            "in": "query",
+            "required": false,
+            "schema": { "type": "integer", "format": "int64" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AdminCommentPageResult" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/api/admin/comments/{id}/status": {
+      "patch": {
+        "tags": ["后台-评论"],
+        "summary": "审核评论",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/Id" }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CommentStatusRequest" },
+              "example": { "status": "approved" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "已更新",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/BaseResult" },
+                "example": { "code": 1, "message": "已更新", "data": null }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/api/admin/comments/{id}": {
+      "delete": {
+        "tags": ["后台-评论"],
+        "summary": "删除评论",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/Id" }],
+        "responses": {
+          "200": {
+            "description": "已删除",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/BaseResult" },
+                "example": { "code": 1, "message": "已删除", "data": null }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/api/admin/friend-links": {
+      "get": {
+        "tags": ["后台-友链"],
+        "summary": "后台友链列表",
+        "description": "包含隐藏的友链。",
+        "security": [{ "cookieAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AdminFriendLinkListResult" }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      },
+      "post": {
+        "tags": ["后台-友链"],
+        "summary": "新增友链",
+        "security": [{ "cookieAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/FriendLinkRequest" },
+              "example": {
+                "name": "某某的博客",
+                "url": "https://example.com",
+                "avatarUrl": "https://example.com/avatar.png",
+                "description": "一个写代码的人",
+                "sortOrder": 0,
+                "visible": true
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "添加成功",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/IdResult" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "409": { "$ref": "#/components/responses/Conflict" }
+        }
+      }
+    },
+    "/api/admin/friend-links/{id}": {
+      "put": {
+        "tags": ["后台-友链"],
+        "summary": "更新友链",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/Id" }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/FriendLinkRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "保存成功",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/BaseResult" },
+                "example": { "code": 1, "message": "保存成功", "data": null }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      },
+      "delete": {
+        "tags": ["后台-友链"],
+        "summary": "删除友链",
+        "security": [{ "cookieAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/Id" }],
+        "responses": {
+          "200": {
+            "description": "已删除",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/BaseResult" },
+                "example": { "code": 1, "message": "已删除", "data": null }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/api/admin/upload": {
+      "post": {
+        "tags": ["后台-其他"],
+        "summary": "上传图片",
+        "description": "单文件不超过 5MB；允许 jpeg/png/webp/gif；禁止 SVG。",
+        "security": [{ "cookieAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["file"],
+                "properties": {
+                  "file": { "type": "string", "format": "binary" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "上传成功",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/UploadResult" },
+                "example": {
+                  "code": 1,
+                  "message": "上传成功",
+                  "data": {
+                    "url": "/uploads/2026/10/6f1c2a9e.webp",
+                    "name": "photo.webp",
+                    "size": 204800
+                  }
+                }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    },
+    "/api/admin/stats": {
+      "get": {
+        "tags": ["后台-其他"],
+        "summary": "后台统计",
+        "security": [{ "cookieAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/StatsResult" },
+                "example": {
+                  "code": 1,
+                  "message": "success",
+                  "data": {
+                    "postCount": 12,
+                    "draftCount": 3,
+                    "commentCount": 25,
+                    "pendingCommentCount": 4,
+                    "friendLinkCount": 6
+                  }
+                }
+              }
+            }
+          },
+          "401": { "$ref": "#/components/responses/Unauthorized" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "JSESSIONID",
+        "description": "登录后由服务端 Set-Cookie 下发，Apifox 会自动保存并在后续请求携带。"
+      }
+    },
+    "parameters": {
+      "Page": {
+        "name": "page",
+        "in": "query",
+        "required": false,
+        "description": "页码，从 1 开始",
+        "schema": { "type": "integer", "default": 1, "minimum": 1 }
+      },
+      "Size": {
+        "name": "size",
+        "in": "query",
+        "required": false,
+        "description": "每页条数，最大 50",
+        "schema": { "type": "integer", "default": 10, "minimum": 1, "maximum": 50 }
+      },
+      "Keyword": {
+        "name": "keyword",
+        "in": "query",
+        "required": false,
+        "description": "标题模糊搜索",
+        "schema": { "type": "string", "maxLength": 50 }
+      },
+      "Id": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": { "type": "integer", "format": "int64" }
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "参数校验失败",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/BaseResult" },
+            "example": { "code": 0, "message": "size 必须在 1~50 之间", "data": null }
+          }
+        }
+      },
+      "Unauthorized": {
+        "description": "未登录或登录已过期",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/BaseResult" },
+            "example": { "code": 0, "message": "未登录或登录已过期", "data": null }
+          }
+        }
+      },
+      "NotFound": {
+        "description": "资源不存在",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/BaseResult" },
+            "example": { "code": 0, "message": "资源不存在", "data": null }
+          }
+        }
+      },
+      "Conflict": {
+        "description": "冲突，例如友链 URL 重复",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/BaseResult" },
+            "example": { "code": 0, "message": "该链接已存在", "data": null }
+          }
+        }
+      },
+      "TooManyRequests": {
+        "description": "请求过于频繁",
+        "content": {
+          "application/json": {
+            "schema": { "$ref": "#/components/schemas/BaseResult" },
+            "example": { "code": 0, "message": "操作太频繁，请稍后再试", "data": null }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "BaseResult": {
+        "type": "object",
+        "description": "统一响应体",
+        "properties": {
+          "code": { "type": "integer", "description": "1 成功，0 失败", "example": 1 },
+          "message": { "type": "string", "example": "success" },
+          "data": { "nullable": true, "description": "业务数据" }
+        }
+      },
+      "PostPageResult": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "integer", "example": 1 },
+          "message": { "type": "string", "example": "success" },
+          "data": { "$ref": "#/components/schemas/PostPage" }
+        }
+      },
+      "PostPage": {
+        "type": "object",
+        "properties": {
+          "list": { "type": "array", "items": { "$ref": "#/components/schemas/PostListItem" } },
+          "total": { "type": "integer", "format": "int64" },
+          "page": { "type": "integer", "format": "int64" },
+          "size": { "type": "integer", "format": "int64" }
+        }
+      },
+      "PostListItem": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "title": { "type": "string" },
+          "summary": { "type": "string", "nullable": true },
+          "coverUrl": { "type": "string", "nullable": true },
+          "publishedAt": { "type": "string", "example": "2026-10-21 19:31:00" },
+          "viewCount": { "type": "integer" }
+        }
+      },
+      "PostDetailResult": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "integer", "example": 1 },
+          "message": { "type": "string", "example": "success" },
+          "data": { "$ref": "#/components/schemas/PostDetail" }
+        }
+      },
+      "PostDetail": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "title": { "type": "string" },
+          "summary": { "type": "string", "nullable": true },
+          "coverUrl": { "type": "string", "nullable": true },
+          "content": { "type": "string", "description": "Markdown 原文" },
+          "status": { "type": "string", "enum": ["draft", "published"] },
+          "publishedAt": { "type": "string", "nullable": true },
+          "createdAt": { "type": "string" },
+          "updatedAt": { "type": "string" },
+          "viewCount": { "type": "integer" },
+          "commentCount": { "type": "integer" }
+        }
+      },
+      "CommentPageResult": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "integer", "example": 1 },
+          "message": { "type": "string", "example": "success" },
+          "data": { "$ref": "#/components/schemas/CommentPage" }
+        }
+      },
+      "CommentPage": {
+        "type": "object",
+        "properties": {
+          "list": { "type": "array", "items": { "$ref": "#/components/schemas/CommentItem" } },
+          "total": { "type": "integer", "format": "int64" },
+          "page": { "type": "integer", "format": "int64" },
+          "size": { "type": "integer", "format": "int64" }
+        }
+      },
+      "CommentItem": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "nickname": { "type": "string" },
+          "website": { "type": "string", "nullable": true },
+          "content": { "type": "string" },
+          "createdAt": { "type": "string" }
+        }
+      },
+      "AdminCommentPageResult": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "integer", "example": 1 },
+          "message": { "type": "string", "example": "success" },
+          "data": { "$ref": "#/components/schemas/AdminCommentPage" }
+        }
+      },
+      "AdminCommentPage": {
+        "type": "object",
+        "properties": {
+          "list": { "type": "array", "items": { "$ref": "#/components/schemas/AdminCommentItem" } },
+          "total": { "type": "integer", "format": "int64" },
+          "page": { "type": "integer", "format": "int64" },
+          "size": { "type": "integer", "format": "int64" }
+        }
+      },
+      "AdminCommentItem": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "postId": { "type": "integer", "format": "int64" },
+          "postTitle": { "type": "string" },
+          "nickname": { "type": "string" },
+          "email": { "type": "string", "nullable": true },
+          "website": { "type": "string", "nullable": true },
+          "content": { "type": "string" },
+          "status": { "type": "string", "enum": ["pending", "approved", "spam"] },
+          "ip": { "type": "string", "nullable": true },
+          "createdAt": { "type": "string" }
+        }
+      },
+      "AdminPostPageResult": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "integer", "example": 1 },
+          "message": { "type": "string", "example": "success" },
+          "data": { "$ref": "#/components/schemas/AdminPostPage" }
+        }
+      },
+      "AdminPostPage": {
+        "type": "object",
+        "properties": {
+          "list": { "type": "array", "items": { "$ref": "#/components/schemas/AdminPostItem" } },
+          "total": { "type": "integer", "format": "int64" },
+          "page": { "type": "integer", "format": "int64" },
+          "size": { "type": "integer", "format": "int64" }
+        }
+      },
+      "AdminPostItem": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "title": { "type": "string" },
+          "status": { "type": "string", "enum": ["draft", "published"] },
+          "publishedAt": { "type": "string", "nullable": true },
+          "updatedAt": { "type": "string" },
+          "viewCount": { "type": "integer" }
+        }
+      },
+      "FriendLinkListResult": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "integer", "example": 1 },
+          "message": { "type": "string", "example": "success" },
+          "data": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/FriendLink" }
+          }
+        }
+      },
+      "AdminFriendLinkListResult": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "integer", "example": 1 },
+          "message": { "type": "string", "example": "success" },
+          "data": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/FriendLink" }
+          }
+        }
+      },
+      "FriendLink": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "name": { "type": "string" },
+          "url": { "type": "string" },
+          "avatarUrl": { "type": "string", "nullable": true },
+          "description": { "type": "string", "nullable": true },
+          "sortOrder": { "type": "integer" },
+          "visible": { "type": "boolean" }
+        }
+      },
+      "HomeResult": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "integer", "example": 1 },
+          "message": { "type": "string", "example": "success" },
+          "data": { "$ref": "#/components/schemas/HomeData" }
+        }
+      },
+      "HomeData": {
+        "type": "object",
+        "properties": {
+          "latestPosts": { "type": "array", "items": { "$ref": "#/components/schemas/PostListItem" } },
+          "latestComments": { "type": "array", "items": { "$ref": "#/components/schemas/HomeComment" } },
+          "friendLinks": { "type": "array", "items": { "$ref": "#/components/schemas/FriendLink" } }
+        }
+      },
+      "HomeComment": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "postId": { "type": "integer", "format": "int64" },
+          "postTitle": { "type": "string" },
+          "nickname": { "type": "string" },
+          "content": { "type": "string" },
+          "createdAt": { "type": "string" }
+        }
+      },
+      "UserInfoResult": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "integer", "example": 1 },
+          "message": { "type": "string", "example": "success" },
+          "data": { "$ref": "#/components/schemas/UserInfo" }
+        }
+      },
+      "UserInfo": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer", "format": "int64" },
+          "username": { "type": "string" },
+          "nickname": { "type": "string", "nullable": true }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": ["username", "password"],
+        "properties": {
+          "username": { "type": "string", "minLength": 1, "maxLength": 32 },
+          "password": { "type": "string", "minLength": 1, "maxLength": 64 }
+        }
+      },
+      "PostUpsertRequest": {
+        "type": "object",
+        "required": ["title", "content"],
+        "properties": {
+          "title": { "type": "string", "minLength": 1, "maxLength": 120 },
+          "summary": { "type": "string", "maxLength": 300, "nullable": true },
+          "coverUrl": { "type": "string", "maxLength": 255, "nullable": true },
+          "content": { "type": "string", "description": "Markdown 原文" },
+          "status": { "type": "string", "enum": ["draft", "published"], "default": "draft" }
+        }
+      },
+      "PostStatusRequest": {
+        "type": "object",
+        "required": ["status"],
+        "properties": {
+          "status": { "type": "string", "enum": ["draft", "published"] }
+        }
+      },
+      "CommentCreateRequest": {
+        "type": "object",
+        "required": ["postId", "nickname", "content"],
+        "properties": {
+          "postId": { "type": "integer", "format": "int64" },
+          "nickname": { "type": "string", "minLength": 1, "maxLength": 32 },
+          "email": { "type": "string", "maxLength": 128, "nullable": true },
+          "website": { "type": "string", "maxLength": 255, "nullable": true },
+          "content": { "type": "string", "minLength": 1, "maxLength": 500 }
+        }
+      },
+      "CommentStatusRequest": {
+        "type": "object",
+        "required": ["status"],
+        "properties": {
+          "status": { "type": "string", "enum": ["pending", "approved", "spam"] }
+        }
+      },
+      "FriendLinkRequest": {
+        "type": "object",
+        "required": ["name", "url"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1, "maxLength": 64 },
+          "url": { "type": "string", "maxLength": 255 },
+          "avatarUrl": { "type": "string", "maxLength": 255, "nullable": true },
+          "description": { "type": "string", "maxLength": 200, "nullable": true },
+          "sortOrder": { "type": "integer", "default": 0 },
+          "visible": { "type": "boolean", "default": true }
+        }
+      },
+      "IdResult": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "integer", "example": 1 },
+          "message": { "type": "string", "example": "success" },
+          "data": {
+            "type": "object",
+            "properties": { "id": { "type": "integer", "format": "int64" } }
+          }
+        }
+      },
+      "UploadResult": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "integer", "example": 1 },
+          "message": { "type": "string", "example": "上传成功" },
+          "data": {
+            "type": "object",
+            "properties": {
+              "url": { "type": "string" },
+              "name": { "type": "string" },
+              "size": { "type": "integer", "format": "int64" }
+            }
+          }
+        }
+      },
+      "StatsResult": {
+        "type": "object",
+        "properties": {
+          "code": { "type": "integer", "example": 1 },
+          "message": { "type": "string", "example": "success" },
+          "data": {
+            "type": "object",
+            "properties": {
+              "postCount": { "type": "integer" },
+              "draftCount": { "type": "integer" },
+              "commentCount": { "type": "integer" },
+              "pendingCommentCount": { "type": "integer" },
+              "friendLinkCount": { "type": "integer" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
