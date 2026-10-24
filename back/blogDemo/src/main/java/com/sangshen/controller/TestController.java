@@ -13,11 +13,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 public class TestController {
-    @Autowired
-    private PostMapper postMapper;
-    @GetMapping("/test")
-    public Result test(){
-        List<Post> posts = postMapper.selectList(null);
-        return Result.success(posts);
-    }
+//    @Autowired
+//    private PostMapper postMapper;
+//    @GetMapping("/test")
+//    public Result test(){
+//        List<Post> posts = postMapper.selectList(null);
+//        return Result.success(posts);
+//    }
 }

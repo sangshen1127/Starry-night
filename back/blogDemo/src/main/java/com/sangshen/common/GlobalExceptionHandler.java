@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
-    //非法参数异常的全局捕捉
+    //非法参数异常的全局捕捉，这只能捕获进入Controller之后的异常
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<Result> handle(IllegalArgumentException iae){
         log.error("非法参数异常：{}", iae.getMessage());

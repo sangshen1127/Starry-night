@@ -1,4 +1,6 @@
 package com.sangshen.config;
+import com.sangshen.security.RestAccessDeniedHandler;
+import com.sangshen.security.RestAuthenticationEntryPoint;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,7 +16,9 @@ public class SecurityConfig {
     // 配置安全过滤器链
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity,
-                                                   SecurityContextRepository securityContextRepository) throws Exception{
+                                                   SecurityContextRepository securityContextRepository,
+                                                   RestAuthenticationEntryPoint restAuthenticationEntryPoint,
+                                                   RestAccessDeniedHandler restAccessDeniedHandler) throws Exception{
         // 第一版先关掉 CSRF，靠 SameSite 兜底
         httpSecurity
                 //指定"登录态存在 Session 里"，读写用同一个仓库
@@ -22,9 +26,14 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                     .authorizeHttpRequests(
                         auth ->
-                                auth.requestMatchers("/api/**","/error").permitAll()    //当前路径下的所有请求都放行
-                                    .anyRequest().authenticated()   //其他所有请求都需要认证
-                );
+                                auth.requestMatchers("/api/auth/login").permitAll()
+                                        .requestMatchers("/api/auth/me", "/api/auth/logout").authenticated()    //拦截
+                                        .requestMatchers("/api/admin/**").authenticated()
+                                        .requestMatchers("/api/**", "/error", "/uploads/**").permitAll()    //当前路径下的所有请求都放行
+                                        .anyRequest().authenticated()   //其他所有请求都需要认证
+                            )
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(restAuthenticationEntryPoint)
+                        .accessDeniedHandler(restAccessDeniedHandler));
         return httpSecurity.build();
     }
 

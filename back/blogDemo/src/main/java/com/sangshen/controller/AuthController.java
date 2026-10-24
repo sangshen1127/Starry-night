@@ -8,6 +8,7 @@ import com.sangshen.entity.dto.UserInfo;
 import com.sangshen.mapper.UserMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,10 +19,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.context.SecurityContextRepository;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -31,6 +29,7 @@ public class AuthController {
     private final AuthService authService;
     private final SecurityContextRepository securityContextRepository;
     private final UserMapper userMapper;
+
     //登录功能
     @PostMapping("/login")
     public ResponseEntity<Result> login(@Valid @RequestBody LoginRequest request,
@@ -57,5 +56,32 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Result.error("用户名或密码错误"));
         }
+    }
+
+    //用于前端刷新页面后恢复登录状态
+    @GetMapping("/me")
+    public Result me(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        log.info("获取用户信息 {}", authentication.getName());
+        User user = userMapper.selectUserByName(username);
+        if(user == null){
+            //账号不存在，按照未登录处理
+            throw new IllegalArgumentException("当前用户并未登录");
+        }
+        UserInfo info = new UserInfo(user.getId(),user.getUsername(),user.getNickname());
+        return Result.success(info);
+    }
+
+    //退出登录
+    @PostMapping("/logout")
+    public Result logout(HttpServletRequest request){
+        log.info("退出当前登录");
+        SecurityContextHolder.clearContext();   //清空当前线程的认证信息
+        HttpSession session = request.getSession(false);//销毁当前会话
+        if(session != null){
+            session.invalidate();   //销毁会话
+        }
+        return Result.success();
     }
 }
