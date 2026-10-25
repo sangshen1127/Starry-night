@@ -101,3 +101,10 @@ INSERT INTO posts (title, summary, cover_url, content, status, published_at)
 VALUES
     ('我的第一篇博客', '这是摘要', NULL, '# 你好\n\n这是第一篇的正文。', 'published', NOW()),
     ('关于数据库设计', NULL, NULL, '第二篇的正文内容。', 'published', NOW());
+
+INSERT INTO comments (post_id, nickname, content, status, created_at)
+VALUES
+    (1, '小明', '写得好', 'approved', NOW()),
+    (1, '小红', '学到了', 'approved', NOW()),
+    (1, '路人', '这篇不行', 'pending', NOW()),
+    (1, '广告机', '加微信 xxx', 'spam', NOW());

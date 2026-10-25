@@ -26,6 +26,13 @@ public class Result {
         return result;
     }
 
+    //成功返回，带信息版本
+    public static Result success(String message){
+        Result result = new Result();
+        result.code = 1;
+        result.message = message;
+        return result;
+    }
     //失败返回
     public static Result error(String msg){
         Result result = new Result();
