@@ -37,7 +37,7 @@ public class AuthController {
                         HttpServletResponse httpResponse){ //@Valid告诉框架这个对象/参数执行校验
         log.info("登录功能");
         try {
-            //用户认证，生成token
+            //用户认证，返回Authentication,包含用户信息与权限
             Authentication authentication = authService.login(
                     request.getUsername(), request.getPassword());
 

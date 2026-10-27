@@ -108,3 +108,11 @@ VALUES
     (1, '小红', '学到了', 'approved', NOW()),
     (1, '路人', '这篇不行', 'pending', NOW()),
     (1, '广告机', '加微信 xxx', 'spam', NOW());
+
+INSERT INTO friend_links (name, url, avatar_url, description, sort_order, visible)
+VALUES
+    ('阮一峰的网络日志', 'https://www.ruanyifeng.com/blog/', NULL, '每周分享科技动态', 1, 1),
+    ('酷壳 CoolShell', 'https://coolshell.cn/', NULL, '技术、职业与思考', 2, 1),
+    ('MDN Web Docs', 'https://developer.mozilla.org/', NULL, '前端开发者的参考书', 3, 1),
+    ('Halo', 'https://www.halo.run/', NULL, '开源建站工具', 4, 1),
+    ('测试友链（隐藏）', 'https://example.com/', NULL, '这条 visible=0，前台不会显示', 99, 0);

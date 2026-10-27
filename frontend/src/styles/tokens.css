@@ -1,0 +1,49 @@
+:root {
+  /* 字体 */
+  --font-sans: "Inter", "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei UI",
+    "Microsoft YaHei", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: "SFMono-Regular", "Cascadia Code", "JetBrains Mono", Consolas,
+    "Liberation Mono", monospace;
+
+  /* 纸面 / 内容 */
+  --paper: #f7f4ee;
+  --paper-deep: #efebe2;
+  --surface: #fffdf8;
+  --ink: #1b2233;
+  --ink-2: #3d465a;
+  --muted: #626b7f;
+  --line: #e6e1d7;
+  --line-strong: #d5cfc2;
+
+  /* 强调色：月光紫 + 星光金 */
+  --violet: #6454c8;
+  --violet-strong: #4f41ad;
+  --violet-soft: #efecfa;
+  --gold: #c6963d;
+  --gold-soft: #f6e9c8;
+
+  /* 夜空 */
+  --night-0: #070a14;
+  --night-1: #0d1225;
+  --night-2: #181e38;
+  --night-3: #2a2850;
+  --night-text: #f4f0e6;
+  --night-muted: #b8b4c9;
+  --night-line: rgba(255, 255, 255, 0.12);
+  --moon: #f5ead2;
+  --star: #f4d58d;
+
+  /* 形状与阴影 */
+  --radius-lg: 30px;
+  --radius-md: 20px;
+  --radius-sm: 14px;
+  --shadow-sm: 0 18px 40px -30px rgba(23, 30, 50, 0.35);
+  --shadow-md: 0 30px 70px -42px rgba(23, 30, 50, 0.5);
+  --shadow-night: 0 44px 100px -60px rgba(7, 10, 20, 0.9);
+
+  /* 布局 */
+  --container: 1200px;
+  --gutter: clamp(20px, 4vw, 40px);
+  --header-h: 76px;
+  --ease: cubic-bezier(0.22, 0.8, 0.22, 1);
+}

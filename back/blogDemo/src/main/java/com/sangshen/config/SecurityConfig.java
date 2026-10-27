@@ -27,8 +27,8 @@ public class SecurityConfig {
                     .authorizeHttpRequests(
                         auth ->
                                 auth.requestMatchers("/api/auth/login").permitAll()
-                                        .requestMatchers("/api/auth/me", "/api/auth/logout").authenticated()    //拦截
-                                        .requestMatchers("/api/admin/**").authenticated()
+                                        .requestMatchers("/api/auth/me", "/api/auth/logout").authenticated()    //拦截，只有通过身份认证才能访问
+                                        .requestMatchers("/api/admin/**").authenticated()   //这里进行拦截
                                         .requestMatchers("/api/**", "/error", "/uploads/**").permitAll()    //当前路径下的所有请求都放行
                                         .anyRequest().authenticated()   //其他所有请求都需要认证
                             )

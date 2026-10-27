@@ -13,6 +13,16 @@
 target/
 build/
 out/
+dist/
+
+### 前端依赖（体积巨大，绝不能提交） ###
+node_modules/
+
+### 参考用的外部主题/示例，不属于项目源码 ###
+frontExample/
+
+### 前端预览图（只是截图，不需要入库） ###
+frontend/preview/
 
 ### 本地配置（含数据库密码，禁止提交） ###
 application.yml
