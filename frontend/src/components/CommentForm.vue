@@ -1,11 +1,11 @@
-<script setup lang="ts">
+<script setup>
 import { onBeforeUnmount, reactive, ref } from 'vue'
 import { submitComment } from '@/api/comments'
 import { ApiError } from '@/api/http'
 
-const props = defineProps<{
-  postId: number
-}>()
+const props = defineProps({
+  postId: { type: Number, required: true },
+})
 
 const form = reactive({
   nickname: '',
@@ -14,30 +14,25 @@ const form = reactive({
   content: '',
 })
 
-const errors = reactive<{
-  nickname?: string
-  email?: string
-  website?: string
-  content?: string
-}>({})
+const errors = reactive({})
 
 const honeypot = ref('')
 const submitting = ref(false)
 const success = ref('')
 const failure = ref('')
 const cooldown = ref(false)
-let cooldownTimer: number | undefined
+let cooldownTimer
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-function clearErrors(): void {
+function clearErrors() {
   errors.nickname = undefined
   errors.email = undefined
   errors.website = undefined
   errors.content = undefined
 }
 
-function validate(): boolean {
+function validate() {
   clearErrors()
 
   const nickname = form.nickname.trim()
@@ -66,7 +61,7 @@ function validate(): boolean {
   return !errors.nickname && !errors.email && !errors.website && !errors.content
 }
 
-function startCooldown(): void {
+function startCooldown() {
   cooldown.value = true
   window.clearTimeout(cooldownTimer)
   cooldownTimer = window.setTimeout(() => {
@@ -74,13 +69,12 @@ function startCooldown(): void {
   }, 60_000)
 }
 
-async function handleSubmit(): Promise<void> {
+async function handleSubmit() {
   success.value = ''
   failure.value = ''
 
   if (!validate() || submitting.value || cooldown.value) return
 
-  // 隐藏蜜罐：正常访客不会填；填入后静默丢弃，不请求后端。
   if (honeypot.value.trim()) {
     success.value = '评论提交成功，请等待审核通过显示。'
     form.content = ''
@@ -118,10 +112,10 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <form class="comment-form" novalidate @submit.prevent="handleSubmit">
+  <form class="comment-form glass-card" novalidate @submit.prevent="handleSubmit">
     <div class="comment-form__head">
       <div>
-        <p class="comment-form__kicker">LEAVE A NOTE</p>
+        <p class="comment-form__kicker">LEAVE A NOTE · 夜话</p>
         <h3 class="comment-form__title">写下想说的话</h3>
       </div>
       <p class="comment-form__hint">提交后需要审核，通过后才会显示</p>
@@ -207,7 +201,6 @@ onBeforeUnmount(() => {
       </p>
     </div>
 
-    <!-- 蜜罐字段：正常用户不可见也不会聚焦 -->
     <div class="comment-form__hp" aria-hidden="true">
       <label for="comment-company">公司</label>
       <input
@@ -237,11 +230,12 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .comment-form {
-  padding: 26px;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
+  padding: 24px;
+  border-radius: 20px;
+}
+
+.comment-form:hover {
+  transform: none;
 }
 
 .comment-form__head {
@@ -255,21 +249,23 @@ onBeforeUnmount(() => {
 
 .comment-form__kicker {
   margin-bottom: 4px;
-  color: var(--violet);
+  color: var(--pink);
   font-family: var(--font-mono);
-  font-size: 0.56rem;
-  letter-spacing: 0.18em;
+  font-size: 0.53rem;
+  letter-spacing: 0.14em;
 }
 
 .comment-form__title {
   color: var(--ink);
-  font-size: 1.15rem;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 400;
 }
 
 .comment-form__hint {
-  color: var(--muted);
-  font-size: 0.68rem;
+  color: var(--faint);
+  font-size: 0.62rem;
+  line-height: 1.6;
 }
 
 .comment-form__row {
@@ -293,26 +289,26 @@ onBeforeUnmount(() => {
   display: block;
   margin-bottom: 6px;
   color: var(--ink-2);
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 600;
 }
 
 .field__counter {
-  color: var(--muted);
+  color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 0.6rem;
+  font-size: 0.55rem;
 }
 
 .field__input {
   display: block;
   width: 100%;
-  padding: 10px 12px;
+  padding: 11px 13px;
   color: var(--ink);
   font-family: inherit;
-  font-size: 0.84rem;
+  font-size: 0.8rem;
   line-height: 1.6;
-  background: var(--paper);
-  border: 1px solid var(--line);
+  background: rgba(10, 7, 19, 0.32);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 10px;
   outline: none;
   transition:
@@ -322,18 +318,17 @@ onBeforeUnmount(() => {
 }
 
 .field__input::placeholder {
-  color: var(--muted);
-  opacity: 0.75;
+  color: rgba(255, 255, 255, 0.28);
 }
 
 .field__input:focus {
-  background: var(--surface);
-  border-color: var(--violet);
-  box-shadow: 0 0 0 3px var(--violet-soft);
+  background: rgba(10, 7, 19, 0.45);
+  border-color: rgba(255, 158, 181, 0.55);
+  box-shadow: 0 0 0 3px rgba(255, 158, 181, 0.08);
 }
 
 .field__input[aria-invalid='true'] {
-  border-color: #c75454;
+  border-color: rgba(255, 120, 120, 0.65);
 }
 
 .field__textarea {
@@ -343,8 +338,8 @@ onBeforeUnmount(() => {
 
 .field__error {
   margin-top: 4px;
-  color: #b54141;
-  font-size: 0.66rem;
+  color: #ffb4b4;
+  font-size: 0.62rem;
 }
 
 .comment-form__hp {
@@ -359,19 +354,21 @@ onBeforeUnmount(() => {
 .comment-form__failure {
   margin-bottom: 12px;
   padding: 9px 12px;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   line-height: 1.6;
   border-radius: 9px;
 }
 
 .comment-form__success {
-  color: #2b6f56;
-  background: #e9f5ee;
+  color: #a8f0d0;
+  background: rgba(64, 180, 128, 0.1);
+  border: 1px solid rgba(64, 180, 128, 0.16);
 }
 
 .comment-form__failure {
-  color: #a53f3f;
-  background: #faecec;
+  color: #ffc0c0;
+  background: rgba(200, 70, 80, 0.1);
+  border: 1px solid rgba(255, 120, 120, 0.16);
 }
 
 .comment-form__actions {
@@ -382,23 +379,19 @@ onBeforeUnmount(() => {
 }
 
 .comment-form__actions .btn {
-  min-height: 38px;
-  padding: 8px 20px;
-  font-size: 0.78rem;
-}
-
-.comment-form__actions .btn:disabled {
-  opacity: 0.55;
+  min-height: 37px;
+  padding: 7px 19px;
+  font-size: 0.7rem;
 }
 
 .comment-form__note {
-  color: var(--muted);
-  font-size: 0.62rem;
+  color: var(--faint);
+  font-size: 0.58rem;
 }
 
 @media (max-width: 640px) {
   .comment-form {
-    padding: 20px;
+    padding: 18px;
   }
 
   .comment-form__row {

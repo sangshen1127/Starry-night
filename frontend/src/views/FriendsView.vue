@@ -1,14 +1,13 @@
-<script setup lang="ts">
+<script setup>
 import { computed, onMounted, ref } from 'vue'
 import EmptyState from '@/components/EmptyState.vue'
 import ErrorState from '@/components/ErrorState.vue'
 import FriendCard from '@/components/FriendCard.vue'
 import { fetchFriendLinks } from '@/api/friendLinks'
 import { ApiError } from '@/api/http'
-import type { FriendLink } from '@/api/types'
 import { safeHttpUrl } from '@/utils/url'
 
-const links = ref<FriendLink[]>([])
+const links = ref([])
 const loading = ref(true)
 const error = ref('')
 
@@ -16,7 +15,7 @@ const friends = computed(() =>
   links.value.filter((friend) => Boolean(safeHttpUrl(friend.url))),
 )
 
-async function load(): Promise<void> {
+async function load() {
   loading.value = true
   error.value = ''
 
@@ -37,15 +36,19 @@ onMounted(load)
 <template>
   <div class="friends-page">
     <div class="container friends-inner">
-      <header class="friends-head">
-        <p class="friends-head__kicker">
-          <span aria-hidden="true">✦</span>
-          FRIENDS · ともだち
-        </p>
-        <h1>友链</h1>
-        <p class="friends-head__lead">
-          一些在同一个夜空下发光的邻居。去他们的小屋坐坐吧。
-        </p>
+      <header class="friends-head glass-panel">
+        <div>
+          <p class="friends-head__kicker">
+            <span aria-hidden="true">✦</span>
+            FRIENDS · ともだち
+            <span class="friends-head__jp" aria-hidden="true">つながり</span>
+          </p>
+          <h1>友链星图</h1>
+          <p class="friends-head__lead">
+            一些在同一个夜空下发光的邻居。推开玻璃门，去他们的小屋坐坐吧。
+          </p>
+        </div>
+        <span class="friends-head__deco" aria-hidden="true">♡</span>
       </header>
 
       <ErrorState
@@ -81,7 +84,7 @@ onMounted(load)
 
 <style scoped>
 .friends-page {
-  padding: 52px 0 24px;
+  padding: 42px 0 24px;
 }
 
 .friends-inner {
@@ -89,67 +92,116 @@ onMounted(load)
 }
 
 .friends-head {
-  max-width: 640px;
-  margin-bottom: 30px;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 22px;
+  overflow: hidden;
+  padding: 34px 38px;
+  margin-bottom: 22px;
+  background:
+    linear-gradient(125deg, rgba(126, 200, 227, 0.07), transparent 48%),
+    rgba(255, 255, 255, 0.045);
+  border-radius: 26px;
+}
+
+.friends-head::after {
+  position: absolute;
+  right: -70px;
+  bottom: -110px;
+  width: 280px;
+  height: 280px;
+  border: 1px solid rgba(126, 200, 227, 0.12);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 26px rgba(126, 200, 227, 0.025),
+    0 0 0 56px rgba(185, 103, 255, 0.02);
+  content: '';
 }
 
 .friends-head__kicker {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-  color: var(--violet);
+  gap: 7px;
+  width: fit-content;
+  margin-bottom: 10px;
+  padding: 4px 9px;
+  color: var(--cyan);
   font-family: var(--font-mono);
-  font-size: 0.62rem;
-  letter-spacing: 0.18em;
+  font-size: 0.54rem;
+  letter-spacing: 0.13em;
+  background: rgba(126, 200, 227, 0.08);
+  border: 1px solid rgba(126, 200, 227, 0.14);
+  border-radius: 999px;
 }
 
-.friends-head__kicker span {
-  color: var(--gold);
+.friends-head__kicker > span:first-child {
+  color: var(--pink);
+  animation: twinkle 3.4s ease-in-out infinite;
+}
+
+.friends-head__jp {
+  padding-left: 7px;
+  color: var(--faint);
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
+  font-family: var(--font-display);
 }
 
 .friends-head h1 {
   color: var(--ink);
-  font-size: clamp(2.4rem, 4.4vw, 3.2rem);
-  font-weight: 800;
-  letter-spacing: -0.035em;
-  line-height: 1.25;
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 4vw, 2.8rem);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.3;
+  text-shadow: 0 0 26px rgba(126, 200, 227, 0.15);
 }
 
 .friends-head__lead {
+  max-width: 40em;
   margin-top: 8px;
   color: var(--muted);
-  font-size: 0.88rem;
-  line-height: 1.8;
+  font-size: 0.8rem;
+  line-height: 1.85;
+}
+
+.friends-head__deco {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  color: rgba(255, 158, 181, 0.3);
+  font-size: 1.1rem;
+  animation: float-soft 5s ease-in-out infinite;
 }
 
 .friends-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 18px;
+  gap: 14px;
 }
 
 .friend-skeleton {
-  height: 86px;
-  border-radius: var(--radius-md);
+  height: 82px;
+  border-radius: 18px;
 }
 
 .friends-note {
-  margin-top: 28px;
-  padding-top: 18px;
-  color: var(--muted);
-  font-size: 0.75rem;
-  border-top: 1px solid var(--line);
+  margin-top: 22px;
+  padding-top: 16px;
+  color: var(--faint);
+  font-size: 0.68rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .friends-note a {
-  color: var(--violet);
-  border-bottom: 1px solid var(--violet-soft);
+  color: var(--pink);
+  border-bottom: 1px solid rgba(255, 158, 181, 0.25);
   transition: color 0.2s var(--ease);
 }
 
 .friends-note a:hover {
-  color: var(--violet-strong);
+  color: var(--cyan);
 }
 
 @media (max-width: 1024px) {
@@ -158,9 +210,20 @@ onMounted(load)
   }
 }
 
+@media (max-width: 760px) {
+  .friends-head {
+    padding: 26px;
+  }
+}
+
 @media (max-width: 640px) {
   .friends-page {
-    padding-top: 38px;
+    padding-top: 28px;
+  }
+
+  .friends-head {
+    padding: 22px;
+    border-radius: 20px;
   }
 
   .friends-head h1 {
@@ -169,7 +232,7 @@ onMounted(load)
 
   .friends-grid {
     grid-template-columns: minmax(0, 1fr);
-    gap: 14px;
+    gap: 12px;
   }
 }
 </style>

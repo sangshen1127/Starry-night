@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { computed } from 'vue'
 import EmptyState from '@/components/EmptyState.vue'
 import ErrorState from '@/components/ErrorState.vue'
@@ -6,25 +6,15 @@ import FeaturedPost from '@/components/FeaturedPost.vue'
 import PostCard from '@/components/PostCard.vue'
 import PostSkeleton from '@/components/PostSkeleton.vue'
 import SectionHeading from '@/components/SectionHeading.vue'
-import type { PostSummary } from '@/api/types'
 
-const props = withDefaults(
-  defineProps<{
-    posts: PostSummary[]
-    loading?: boolean
-    error?: string
-    lastUpdated?: string
-  }>(),
-  {
-    loading: false,
-    error: '',
-    lastUpdated: '',
-  },
-)
+const props = defineProps({
+  posts: { type: Array, default: () => [] },
+  loading: { type: Boolean, default: false },
+  error: { type: String, default: '' },
+  lastUpdated: { type: String, default: '' },
+})
 
-const emit = defineEmits<{
-  retry: []
-}>()
+const emit = defineEmits(['retry'])
 
 const featured = computed(() => props.posts[0] ?? null)
 const rest = computed(() => props.posts.slice(1))
@@ -39,7 +29,7 @@ const meta = computed(() => {
 <template>
   <section id="posts" class="latest" aria-labelledby="latest-heading">
     <SectionHeading
-      kicker="LATEST NOTES · 最新"
+      kicker="LATEST NOTES · 最新笔记"
       title="最新文章"
       heading-id="latest-heading"
       :meta="meta"
@@ -60,6 +50,8 @@ const meta = computed(() => {
         </RouterLink>
       </template>
     </SectionHeading>
+
+    <p class="latest__lead">把夜里发光的片段，收进一张张玻璃卡片。</p>
 
     <ErrorState
       v-if="error"
@@ -102,31 +94,43 @@ const meta = computed(() => {
 
 <style scoped>
 .latest {
-  scroll-margin-top: 96px;
+  scroll-margin-top: 100px;
+}
+
+.latest__lead {
+  margin-top: -12px;
+  margin-bottom: 18px;
+  color: var(--faint);
+  font-size: 0.75rem;
+  line-height: 1.8;
 }
 
 .post-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 22px;
-  margin-top: 22px;
+  gap: 14px;
 }
 
 .post-grid--single {
   grid-template-columns: minmax(0, 1fr);
 }
 
-.latest__loading .post-grid {
-  margin-top: 22px;
+.latest__loading {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
 .section-link {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  color: var(--ink-2);
-  font-size: 0.72rem;
-  transition: color 0.2s var(--ease);
+  gap: 5px;
+  color: var(--pink);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  transition:
+    color 0.2s var(--ease),
+    text-shadow 0.2s var(--ease);
 }
 
 .section-link svg {
@@ -136,7 +140,8 @@ const meta = computed(() => {
 }
 
 .section-link:hover {
-  color: var(--violet);
+  color: var(--cyan);
+  text-shadow: 0 0 16px rgba(126, 200, 227, 0.4);
 }
 
 .section-link:hover svg {
@@ -146,12 +151,7 @@ const meta = computed(() => {
 @media (max-width: 720px) {
   .post-grid {
     grid-template-columns: minmax(0, 1fr);
-    gap: 18px;
-    margin-top: 18px;
-  }
-
-  .latest__loading .post-grid {
-    margin-top: 18px;
+    gap: 12px;
   }
 }
 </style>

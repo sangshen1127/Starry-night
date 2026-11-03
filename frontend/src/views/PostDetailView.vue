@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { computed, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import ArticleContent from '@/components/ArticleContent.vue'
@@ -10,7 +10,6 @@ import SectionHeading from '@/components/SectionHeading.vue'
 import { ApiError } from '@/api/http'
 import { fetchPostComments } from '@/api/comments'
 import { fetchPostDetail } from '@/api/posts'
-import type { PostDetail, PublicComment } from '@/api/types'
 import { formatDate, formatViewCount, toDateTimeAttr } from '@/utils/date'
 
 const COMMENT_PAGE_SIZE = 10
@@ -18,12 +17,12 @@ const COMMENT_PAGE_SIZE = 10
 const route = useRoute()
 
 const postId = computed(() => Number(route.params.id))
-const post = ref<PostDetail | null>(null)
+const post = ref(null)
 const postLoading = ref(true)
 const postError = ref('')
 const notFound = ref(false)
 
-const comments = ref<PublicComment[]>([])
+const comments = ref([])
 const commentPage = ref(1)
 const commentTotal = ref(0)
 const commentsLoading = ref(true)
@@ -43,11 +42,11 @@ const commentMeta = computed(() => {
   return commentTotal.value ? `${commentTotal.value} 条已通过` : '还没有留言'
 })
 
-function isInvalidId(id: number): boolean {
+function isInvalidId(id) {
   return !Number.isInteger(id) || id < 1
 }
 
-async function loadPost(): Promise<void> {
+async function loadPost() {
   const id = postId.value
   const request = ++postRequestId
 
@@ -80,7 +79,7 @@ async function loadPost(): Promise<void> {
   }
 }
 
-async function loadComments(): Promise<void> {
+async function loadComments() {
   const id = postId.value
   if (isInvalidId(id)) return
 
@@ -107,7 +106,7 @@ async function loadComments(): Promise<void> {
   }
 }
 
-function changeCommentPage(nextPage: number): void {
+function changeCommentPage(nextPage) {
   commentPage.value = nextPage
   void loadComments()
 }
@@ -130,7 +129,7 @@ watch(
     <div class="container detail-container">
       <RouterLink class="back-link" to="/posts">← 返回文章列表</RouterLink>
 
-      <div v-if="postLoading" class="detail-loading" aria-busy="true" aria-live="polite">
+      <div v-if="postLoading" class="detail-loading glass-panel" aria-busy="true" aria-live="polite">
         <span class="sr-only">正在加载文章…</span>
         <span class="skeleton detail-loading__title" />
         <span class="skeleton detail-loading__title-short" />
@@ -143,32 +142,29 @@ watch(
         </div>
       </div>
 
-      <div v-else-if="notFound" class="detail-state">
+      <div v-else-if="notFound" class="detail-state glass-panel">
         <span class="detail-state__mark" aria-hidden="true">✦</span>
-        <p class="detail-state__kicker">404 · ARTICLE</p>
-        <h1>这篇文章不在这片夜色里</h1>
-        <p>它可能被删除、转为草稿，或者链接写错了。</p>
+        <p class="detail-state__kicker">404 · LOST IN THE NIGHT</p>
+        <h1>这个夜晚没有这一页</h1>
+        <p>它可能被删除、转为草稿，或者链接写错了。星星不会怪你。</p>
         <div class="detail-state__actions">
           <RouterLink class="btn btn--primary" to="/posts">回到文章列表</RouterLink>
-          <RouterLink class="btn btn--quiet" to="/">回到首页</RouterLink>
+          <RouterLink class="btn btn--ghost" to="/">回到首页</RouterLink>
         </div>
       </div>
 
       <div v-else-if="postError" class="detail-error">
-        <ErrorState
-          title="文章加载失败"
-          :message="postError"
-          @retry="loadPost"
-        />
+        <ErrorState title="文章加载失败" :message="postError" @retry="loadPost" />
         <RouterLink class="back-link" to="/posts">← 返回文章列表</RouterLink>
       </div>
 
       <template v-else-if="post">
-        <article class="article" :aria-labelledby="`article-title-${post.id}`">
+        <article class="article glass-panel" :aria-labelledby="`article-title-${post.id}`">
           <header class="article__head">
             <p class="article__kicker">
               <span aria-hidden="true">✦</span>
               NIGHT NOTE · 夜色笔记
+              <span class="article__jp" aria-hidden="true">きらめき</span>
             </p>
             <h1 :id="`article-title-${post.id}`" class="article__title">
               {{ post.title }}
@@ -176,20 +172,17 @@ watch(
             <p v-if="post.summary" class="article__summary">{{ post.summary }}</p>
 
             <div class="article__meta">
+              <span class="article__tag">NIGHT NOTE</span>
               <time v-if="dateTime" :datetime="dateTime">{{ published }}</time>
               <span v-if="dateTime && views" aria-hidden="true">·</span>
               <span v-if="views">{{ views }} 次阅读</span>
-              <span aria-hidden="true">·</span>
+              <span class="article__meta-dot" aria-hidden="true">·</span>
               <span>{{ commentMeta }}</span>
             </div>
           </header>
 
           <div v-if="post.coverUrl" class="article__cover">
-            <CoverImage
-              :src="post.coverUrl"
-              :tone="tone"
-              loading="eager"
-            />
+            <CoverImage :src="post.coverUrl" :tone="tone" loading="eager" />
           </div>
 
           <div class="article__content">
@@ -204,7 +197,7 @@ watch(
 
         <section id="comments" class="comments-section" aria-labelledby="comments-heading">
           <SectionHeading
-            kicker="COMMENTS · 留言"
+            kicker="COMMENTS · 夜话"
             title="留言"
             heading-id="comments-heading"
             :meta="commentMeta"
@@ -230,60 +223,80 @@ watch(
 
 <style scoped>
 .detail-page {
-  padding: 42px 0 24px;
+  padding: 38px 0 20px;
 }
 
 .detail-container {
-  max-width: 860px;
+  max-width: 900px;
 }
 
 .back-link {
   display: inline-flex;
   align-items: center;
-  color: var(--muted);
+  color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 0.68rem;
+  font-size: 0.6rem;
   letter-spacing: 0.02em;
-  transition: color 0.2s var(--ease);
+  transition:
+    color 0.2s var(--ease),
+    text-shadow 0.2s var(--ease);
 }
 
 .back-link:hover {
-  color: var(--violet);
+  color: var(--pink);
+  text-shadow: 0 0 16px rgba(255, 158, 181, 0.35);
 }
 
 .article {
-  margin-top: 22px;
+  margin-top: 20px;
+  padding: 38px 40px;
+  border-radius: 26px;
 }
 
 .article__kicker {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
+  width: fit-content;
   margin-bottom: 12px;
-  color: var(--violet);
+  padding: 4px 9px;
+  color: var(--pink);
   font-family: var(--font-mono);
-  font-size: 0.62rem;
-  letter-spacing: 0.16em;
+  font-size: 0.53rem;
+  letter-spacing: 0.12em;
+  background: rgba(255, 158, 181, 0.08);
+  border: 1px solid rgba(255, 158, 181, 0.14);
+  border-radius: 999px;
 }
 
-.article__kicker span {
-  color: var(--gold);
+.article__kicker span:first-child {
+  text-shadow: 0 0 14px rgba(255, 158, 181, 0.65);
+}
+
+.article__jp {
+  padding-left: 7px;
+  color: var(--faint);
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
+  font-family: var(--font-display);
 }
 
 .article__title {
   color: var(--ink);
-  font-size: clamp(2.2rem, 4.5vw, 3.1rem);
-  font-weight: 800;
-  letter-spacing: -0.04em;
-  line-height: 1.3;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4.2vw, 2.8rem);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.35;
   text-wrap: balance;
+  text-shadow: 0 0 26px rgba(255, 158, 181, 0.16);
 }
 
 .article__summary {
-  max-width: 42em;
-  margin-top: 14px;
+  max-width: 44em;
+  margin-top: 12px;
   color: var(--muted);
-  font-size: 0.92rem;
+  font-size: 0.86rem;
   line-height: 1.9;
 }
 
@@ -291,26 +304,39 @@ watch(
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
-  margin-top: 20px;
-  color: var(--muted);
+  gap: 7px;
+  margin-top: 18px;
+  color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 0.64rem;
-  letter-spacing: 0.02em;
+  font-size: 0.56rem;
+}
+
+.article__tag {
+  padding: 2px 8px;
+  color: var(--cyan);
+  font-size: 0.46rem;
+  letter-spacing: 0.09em;
+  background: rgba(126, 200, 227, 0.1);
+  border: 1px solid rgba(126, 200, 227, 0.18);
+  border-radius: 999px;
+}
+
+.article__meta-dot {
+  color: rgba(255, 255, 255, 0.2);
 }
 
 .article__cover {
   position: relative;
   overflow: hidden;
-  margin: 30px 0;
-  aspect-ratio: 16 / 9;
-  background: var(--night-1);
-  border: 1px solid var(--line);
-  border-radius: 20px;
+  margin: 28px 0;
+  aspect-ratio: 16 / 8.6;
+  background: #161025;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
 }
 
 .article__content {
-  margin-top: 30px;
+  margin-top: 28px;
 }
 
 .article__foot {
@@ -319,29 +345,29 @@ watch(
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-top: 46px;
-  padding-top: 18px;
-  border-top: 1px solid var(--line);
+  margin-top: 40px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .article__foot-note {
-  color: var(--muted);
+  color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 0.6rem;
+  font-size: 0.52rem;
 }
 
 .comments-section {
-  padding-top: 48px;
-  margin-top: 56px;
-  border-top: 1px solid var(--line);
+  padding-top: 42px;
+  margin-top: 46px;
 }
 
 .comments-section :deep(.comment-list) {
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 }
 
 .detail-loading {
-  padding-top: 30px;
+  margin-top: 20px;
+  padding: 38px;
 }
 
 .detail-loading__title {
@@ -349,7 +375,7 @@ watch(
   width: 78%;
   height: 34px;
   margin-bottom: 12px;
-  border-radius: 7px;
+  border-radius: 8px;
 }
 
 .detail-loading__title-short {
@@ -357,25 +383,25 @@ watch(
   width: 48%;
   height: 34px;
   margin-bottom: 18px;
-  border-radius: 7px;
+  border-radius: 8px;
 }
 
 .detail-loading__meta {
   display: block;
   width: 28%;
   height: 9px;
-  margin-bottom: 34px;
+  margin-bottom: 30px;
   border-radius: 4px;
 }
 
 .detail-loading__body {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 13px;
 }
 
 .detail-loading__body .skeleton {
-  height: 12px;
+  height: 11px;
   border-radius: 4px;
 }
 
@@ -387,7 +413,9 @@ watch(
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  padding: 54px 0 40px;
+  padding: 48px 40px;
+  margin-top: 20px;
+  border-radius: 24px;
 }
 
 .detail-state__mark {
@@ -396,84 +424,81 @@ watch(
   width: 56px;
   height: 56px;
   margin-bottom: 20px;
-  color: var(--star);
-  background: var(--night-1);
+  color: var(--pink);
+  font-size: 1.1rem;
+  background: rgba(255, 158, 181, 0.09);
+  border: 1px solid rgba(255, 158, 181, 0.18);
   border-radius: 50%;
-  box-shadow: 0 0 0 8px rgba(100, 84, 200, 0.08);
+  box-shadow: 0 0 30px rgba(255, 158, 181, 0.16);
 }
 
 .detail-state__kicker {
   margin-bottom: 8px;
-  color: var(--violet);
+  color: var(--pink);
   font-family: var(--font-mono);
-  font-size: 0.62rem;
-  letter-spacing: 0.15em;
+  font-size: 0.56rem;
+  letter-spacing: 0.13em;
 }
 
 .detail-state h1 {
   color: var(--ink);
-  font-size: clamp(2rem, 4vw, 2.7rem);
-  font-weight: 800;
-  letter-spacing: -0.03em;
-  line-height: 1.3;
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.35;
 }
 
 .detail-state p {
   max-width: 34em;
-  margin-top: 12px;
+  margin-top: 10px;
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   line-height: 1.8;
 }
 
 .detail-state__actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 26px;
-}
-
-.btn--quiet {
-  color: var(--ink-2);
-  border-color: var(--line-strong);
-}
-
-.btn--quiet:hover {
-  color: var(--violet);
-  background: var(--violet-soft);
-  border-color: var(--violet-soft);
+  gap: 10px;
+  margin-top: 24px;
 }
 
 .detail-error {
-  padding: 24px 0;
+  padding: 22px 0;
 }
 
 .detail-error .back-link {
-  margin-top: 20px;
+  margin-top: 18px;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 720px) {
   .detail-page {
-    padding-top: 30px;
+    padding-top: 28px;
+  }
+
+  .article {
+    padding: 24px 20px;
+    border-radius: 20px;
   }
 
   .article__title {
-    font-size: 2rem;
+    font-size: 1.95rem;
   }
 
   .article__cover {
-    margin: 24px 0;
+    margin: 22px 0;
     aspect-ratio: 16 / 10;
-    border-radius: 16px;
+    border-radius: 15px;
   }
 
-  .article__foot {
-    margin-top: 34px;
+  .detail-state {
+    padding: 34px 24px;
   }
 
   .comments-section {
     padding-top: 34px;
-    margin-top: 40px;
+    margin-top: 36px;
   }
 }
 </style>

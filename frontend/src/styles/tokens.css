@@ -1,49 +1,86 @@
 :root {
   /* 字体 */
-  --font-sans: "Inter", "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei UI",
-    "Microsoft YaHei", "Segoe UI", system-ui, -apple-system, sans-serif;
-  --font-mono: "SFMono-Regular", "Cascadia Code", "JetBrains Mono", Consolas,
-    "Liberation Mono", monospace;
+  --font-display: "ZCOOL KuaiLe", "PingFang SC", "HarmonyOS Sans SC",
+    "Microsoft YaHei UI", "Microsoft YaHei", system-ui, sans-serif;
+  --font-sans: "Quicksand", "Nunito", "PingFang SC", "HarmonyOS Sans SC",
+    "Microsoft YaHei UI", "Microsoft YaHei", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "Space Grotesk", "Quicksand", "Cascadia Code", "JetBrains Mono",
+    Consolas, monospace;
 
-  /* 纸面 / 内容 */
-  --paper: #f7f4ee;
-  --paper-deep: #efebe2;
-  --surface: #fffdf8;
-  --ink: #1b2233;
-  --ink-2: #3d465a;
-  --muted: #626b7f;
-  --line: #e6e1d7;
-  --line-strong: #d5cfc2;
+  /* 暗色基底 */
+  --bg-0: #0a0713;
+  --bg-1: #0f0c1b;
+  --bg-2: #141026;
+  --bg-3: #1b1531;
+  --ink: rgba(255, 255, 255, 0.92);
+  --ink-2: rgba(255, 255, 255, 0.78);
+  --muted: rgba(255, 255, 255, 0.60);
+  --faint: rgba(255, 255, 255, 0.42);
 
-  /* 强调色：月光紫 + 星光金 */
-  --violet: #6454c8;
-  --violet-strong: #4f41ad;
-  --violet-soft: #efecfa;
-  --gold: #c6963d;
-  --gold-soft: #f6e9c8;
+  /* 兼容旧组件使用的 token */
+  --paper: #0f0c1b;
+  --paper-deep: #0a0713;
+  --surface: rgba(255, 255, 255, 0.06);
+  --line: rgba(255, 255, 255, 0.12);
+  --line-strong: rgba(255, 255, 255, 0.2);
 
-  /* 夜空 */
-  --night-0: #070a14;
-  --night-1: #0d1225;
-  --night-2: #181e38;
-  --night-3: #2a2850;
-  --night-text: #f4f0e6;
-  --night-muted: #b8b4c9;
+  /* 二次元强调色 */
+  --pink: #ff9eb5;
+  --pink-soft: rgba(255, 158, 181, 0.16);
+  --cyan: #7ec8e3;
+  --cyan-soft: rgba(126, 200, 227, 0.14);
+  --purple: #b967ff;
+  --purple-strong: #8f4bff;
+  --violet: #b967ff;
+  --violet-strong: #ff9eb5;
+  --violet-soft: rgba(185, 103, 255, 0.15);
+  --gold: #ffd6e7;
+  --gold-soft: rgba(255, 214, 231, 0.16);
+  --gradient: linear-gradient(135deg, #ff9eb5 0%, #b967ff 100%);
+  --gradient-cyan: linear-gradient(135deg, #7ec8e3 0%, #b967ff 100%);
+  --glow-pink: 0 0 34px rgba(255, 158, 181, 0.28);
+  --glow-purple: 0 0 38px rgba(185, 103, 255, 0.25);
+
+  /* 夜空兼容 token */
+  --night-0: #080611;
+  --night-1: #0f0c1b;
+  --night-2: #18122c;
+  --night-3: #241a44;
+  --night-text: rgba(255, 255, 255, 0.92);
+  --night-muted: rgba(255, 255, 255, 0.55);
   --night-line: rgba(255, 255, 255, 0.12);
-  --moon: #f5ead2;
-  --star: #f4d58d;
+  --moon: #ffe1ed;
+  --star: #ffd6e7;
 
-  /* 形状与阴影 */
-  --radius-lg: 30px;
+  /* 玻璃层 */
+  --glass: rgba(255, 255, 255, 0.07);
+  --glass-strong: rgba(255, 255, 255, 0.09);
+  --glass-soft: rgba(255, 255, 255, 0.04);
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-border-strong: rgba(255, 255, 255, 0.24);
+  --glass-blur: blur(16px) saturate(140%);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  --glass-shadow-lg: 0 24px 90px rgba(0, 0, 0, 0.5);
+
+  /* 形状 */
+  --radius-xl: 28px;
+  --radius-lg: 24px;
   --radius-md: 20px;
-  --radius-sm: 14px;
-  --shadow-sm: 0 18px 40px -30px rgba(23, 30, 50, 0.35);
-  --shadow-md: 0 30px 70px -42px rgba(23, 30, 50, 0.5);
-  --shadow-night: 0 44px 100px -60px rgba(7, 10, 20, 0.9);
+  --radius-sm: 12px;
+  --shadow-sm: 0 8px 32px rgba(0, 0, 0, 0.32);
+  --shadow-md: 0 18px 54px rgba(0, 0, 0, 0.42);
+  --shadow-night: 0 30px 90px rgba(0, 0, 0, 0.55);
 
   /* 布局 */
   --container: 1200px;
-  --gutter: clamp(20px, 4vw, 40px);
-  --header-h: 76px;
+  --gutter: clamp(18px, 4vw, 40px);
+  --header-h: 78px;
   --ease: cubic-bezier(0.22, 0.8, 0.22, 1);
+}
+
+@media (max-width: 760px) {
+  :root {
+    --glass: rgba(255, 255, 255, 0.09);
+    --glass-border: rgba(255, 255, 255, 0.16);
+  }
 }

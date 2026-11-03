@@ -1,12 +1,7 @@
-<script setup lang="ts">
-withDefaults(
-  defineProps<{
-    featured?: boolean
-  }>(),
-  {
-    featured: false,
-  },
-)
+<script setup>
+defineProps({
+  featured: { type: Boolean, default: false },
+})
 </script>
 
 <template>
@@ -15,7 +10,7 @@ withDefaults(
     :class="{ 'post-skeleton--featured': featured }"
     aria-hidden="true"
   >
-    <div class="skeleton post-skeleton__media" />
+    <div class="skeleton post-skeleton__thumb" />
     <div class="post-skeleton__body">
       <span class="skeleton post-skeleton__line post-skeleton__line--meta" />
       <span class="skeleton post-skeleton__line post-skeleton__line--title" />
@@ -28,99 +23,81 @@ withDefaults(
 
 <style scoped>
 .post-skeleton {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 16px;
+  align-items: center;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
 }
 
-.post-skeleton__media {
-  width: 100%;
-  aspect-ratio: 16 / 10;
-  border-radius: 0;
+.post-skeleton__thumb {
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
 }
 
 .post-skeleton__body {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 20px;
+  gap: 9px;
 }
 
 .post-skeleton__line {
   height: 10px;
-  border-radius: 4px;
+  border-radius: 5px;
 }
 
 .post-skeleton__line--meta {
-  width: 35%;
-  height: 8px;
+  width: 34%;
+  height: 7px;
 }
 
 .post-skeleton__line--title {
-  width: 88%;
+  width: 82%;
   height: 15px;
 }
 
 .post-skeleton__line--title-short {
-  width: 62%;
+  width: 55%;
   height: 15px;
 }
 
 .post-skeleton__line--short {
-  width: 48%;
+  width: 62%;
 }
 
 .post-skeleton--featured {
-  display: grid;
-  grid-template-columns: 1.04fr 0.96fr;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-height: 300px;
+  padding: 0;
+  overflow: hidden;
 }
 
-.post-skeleton--featured .post-skeleton__media {
-  height: 100%;
-  min-height: 340px;
-  aspect-ratio: auto;
+.post-skeleton--featured .post-skeleton__thumb {
+  width: 100%;
+  height: 220px;
+  border-radius: 0;
 }
 
 .post-skeleton--featured .post-skeleton__body {
-  justify-content: center;
-  padding: 34px;
-  gap: 13px;
+  padding: 24px;
 }
 
-.post-skeleton--featured .post-skeleton__line--meta {
-  width: 28%;
-}
-
-.post-skeleton--featured .post-skeleton__line--title {
-  width: 92%;
-  height: 22px;
-}
-
-.post-skeleton--featured .post-skeleton__line--title-short {
-  width: 68%;
-  height: 22px;
-}
-
-.post-skeleton--featured .post-skeleton__line {
-  height: 11px;
-}
-
-@media (max-width: 860px) {
-  .post-skeleton--featured {
-    grid-template-columns: minmax(0, 1fr);
+@media (max-width: 560px) {
+  .post-skeleton {
+    grid-template-columns: 76px minmax(0, 1fr);
+    gap: 12px;
+    padding: 13px;
   }
 
-  .post-skeleton--featured .post-skeleton__media {
-    min-height: 0;
-    aspect-ratio: 16 / 10;
-  }
-
-  .post-skeleton--featured .post-skeleton__body {
-    padding: 24px 20px;
+  .post-skeleton__thumb {
+    width: 76px;
+    height: 76px;
   }
 }
 </style>

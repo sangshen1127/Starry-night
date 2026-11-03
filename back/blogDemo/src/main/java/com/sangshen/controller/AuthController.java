@@ -1,6 +1,6 @@
 package com.sangshen.controller;
 
-import com.sangshen.Service.Auth.AuthService;
+import com.sangshen.service.Auth.AuthService;
 import com.sangshen.entity.Result;
 import com.sangshen.entity.User;
 import com.sangshen.entity.dto.LoginRequest;
@@ -39,7 +39,7 @@ public class AuthController {
         try {
             //用户认证，返回Authentication,包含用户信息与权限
             Authentication authentication = authService.login(
-                    request.getUsername(), request.getPassword());
+                    request.getUsername(), request.getPassword(),httpRequest.getRemoteAddr());
 
             //新建一个空的上下文，将得到的用户信息存入上下文
             SecurityContext context = SecurityContextHolder.createEmptyContext();

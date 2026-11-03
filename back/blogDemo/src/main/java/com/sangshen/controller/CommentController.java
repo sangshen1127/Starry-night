@@ -1,5 +1,5 @@
 package com.sangshen.controller;
-import com.sangshen.Service.CommentService;
+import com.sangshen.service.CommentService;
 import com.sangshen.entity.Result;
 import com.sangshen.entity.dto.CommentCreateRequest;
 import jakarta.servlet.http.HttpServletRequest;

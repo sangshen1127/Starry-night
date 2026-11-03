@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 import { computed } from 'vue'
 import FriendLinks from '@/components/FriendLinks.vue'
 import HeroSection from '@/components/HeroSection.vue'
@@ -44,31 +44,36 @@ const lastUpdated = computed(() => formatDate(latestPosts.value[0]?.publishedAt)
 </template>
 
 <style scoped>
+.home {
+  padding-bottom: 10px;
+}
+
 .home__layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 330px;
   align-items: start;
-  gap: 56px;
-  padding-top: 64px;
+  gap: 26px;
+  padding-top: 46px;
 }
 
 .home__sidebar {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 18px;
 }
 
 @media (max-width: 1120px) {
   .home__layout {
     grid-template-columns: minmax(0, 1fr);
-    gap: 38px;
+    gap: 28px;
+    padding-top: 38px;
   }
 
   .home__sidebar {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     align-items: start;
-    gap: 20px;
+    gap: 16px;
   }
 }
 
@@ -80,8 +85,12 @@ const lastUpdated = computed(() => formatDate(latestPosts.value[0]?.publishedAt)
 
 @media (max-width: 640px) {
   .home__layout {
-    padding-top: 46px;
-    gap: 32px;
+    gap: 24px;
+    padding-top: 28px;
+  }
+
+  .home__sidebar {
+    gap: 12px;
   }
 }
 </style>

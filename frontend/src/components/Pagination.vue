@@ -1,22 +1,15 @@
-<script setup lang="ts">
+<script setup>
 import { computed } from 'vue'
 
-const props = withDefaults(
-  defineProps<{
-    page: number
-    totalPages: number
-    compact?: boolean
-  }>(),
-  {
-    compact: false,
-  },
-)
+const props = defineProps({
+  page: { type: Number, required: true },
+  totalPages: { type: Number, required: true },
+  compact: { type: Boolean, default: false },
+})
 
-const emit = defineEmits<{
-  change: [page: number]
-}>()
+const emit = defineEmits(['change'])
 
-const pages = computed<(number | 'gap')[]>(() => {
+const pages = computed(() => {
   const total = props.totalPages
   if (total <= 1) return []
 
@@ -24,7 +17,7 @@ const pages = computed<(number | 'gap')[]>(() => {
     return Array.from({ length: total }, (_, index) => index + 1)
   }
 
-  const set = new Set<number>([1, total, props.page - 1, props.page, props.page + 1])
+  const set = new Set([1, total, props.page - 1, props.page, props.page + 1])
   if (props.page <= 3) {
     ;[2, 3, 4].forEach((page) => set.add(page))
   }
@@ -33,7 +26,7 @@ const pages = computed<(number | 'gap')[]>(() => {
   }
 
   const sorted = [...set].filter((page) => page >= 1 && page <= total).sort((a, b) => a - b)
-  const result: (number | 'gap')[] = []
+  const result = []
 
   sorted.forEach((page, index) => {
     if (index > 0 && page - sorted[index - 1] > 1) result.push('gap')
@@ -43,7 +36,7 @@ const pages = computed<(number | 'gap')[]>(() => {
   return result
 })
 
-function go(page: number): void {
+function go(page) {
   if (page < 1 || page > props.totalPages || page === props.page) return
   emit('change', page)
 }
@@ -108,40 +101,46 @@ function go(page: number): void {
   min-width: 38px;
   height: 38px;
   padding: 0 9px;
-  color: var(--ink-2);
+  color: var(--muted);
   font-family: var(--font-mono);
-  font-size: 0.72rem;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  background: var(--surface);
+  font-size: 0.68rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 11px;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
   transition:
     color 0.2s var(--ease),
-    border-color 0.2s var(--ease),
     background 0.2s var(--ease),
-    transform 0.2s var(--ease);
+    border-color 0.2s var(--ease),
+    transform 0.2s var(--ease),
+    box-shadow 0.2s var(--ease);
 }
 
 .pagination button:hover:not(:disabled) {
-  color: var(--violet);
-  border-color: var(--violet);
+  color: var(--pink);
+  background: rgba(255, 158, 181, 0.1);
+  border-color: rgba(255, 158, 181, 0.3);
+  box-shadow: 0 0 20px rgba(255, 158, 181, 0.12);
   transform: translateY(-1px);
 }
 
 .pagination button:disabled {
-  opacity: 0.35;
+  opacity: 0.3;
 }
 
 .pagination__page[aria-current='page'] {
-  color: #fff;
-  background: var(--violet);
-  border-color: var(--violet);
+  color: #24102a;
+  background: var(--gradient);
+  border-color: transparent;
+  box-shadow: 0 6px 20px rgba(185, 103, 255, 0.25);
 }
 
 .pagination__gap {
   padding: 0 2px;
-  color: var(--muted);
+  color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 0.7rem;
+  font-size: 0.66rem;
 }
 
 .pagination--compact {
@@ -152,7 +151,7 @@ function go(page: number): void {
 .pagination--compact button {
   min-width: 32px;
   height: 32px;
-  font-size: 0.66rem;
-  border-radius: 8px;
+  font-size: 0.62rem;
+  border-radius: 9px;
 }
 </style>

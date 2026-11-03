@@ -1,19 +1,13 @@
-<script setup lang="ts">
+<script setup>
 import EmptyState from '@/components/EmptyState.vue'
-import type { HomeComment } from '@/api/types'
 import { formatCommentDate, toDateTimeAttr } from '@/utils/date'
+import { getInitial } from '@/utils/url'
 
-withDefaults(
-  defineProps<{
-    comments: HomeComment[]
-    loading?: boolean
-    error?: string
-  }>(),
-  {
-    loading: false,
-    error: '',
-  },
-)
+defineProps({
+  comments: { type: Array, default: () => [] },
+  loading: { type: Boolean, default: false },
+  error: { type: String, default: '' },
+})
 </script>
 
 <template>
@@ -44,20 +38,26 @@ withDefaults(
 
     <ul v-else class="comment-list">
       <li v-for="comment in comments" :key="comment.id" class="comment">
-        <p class="comment__text">{{ comment.content }}</p>
-        <div class="comment__meta">
-          <span class="comment__name">{{ comment.nickname }}</span>
-          <time
-            v-if="comment.createdAt"
-            :datetime="toDateTimeAttr(comment.createdAt) || undefined"
-          >
-            {{ formatCommentDate(comment.createdAt) }}
-          </time>
+        <span class="comment__avatar" aria-hidden="true">
+          {{ getInitial(comment.nickname) }}
+        </span>
+        <div class="comment__body">
+          <p class="comment__text">{{ comment.content }}</p>
+          <div class="comment__meta">
+            <span class="comment__name">{{ comment.nickname }}</span>
+            <time
+              v-if="comment.createdAt"
+              :datetime="toDateTimeAttr(comment.createdAt) || undefined"
+            >
+              {{ formatCommentDate(comment.createdAt) }}
+            </time>
+          </div>
           <RouterLink
             v-if="comment.postTitle"
             class="comment__post"
             :to="{ name: 'post', params: { id: comment.postId } }"
           >
+            <span aria-hidden="true">↳</span>
             {{ comment.postTitle }}
           </RouterLink>
         </div>
@@ -70,77 +70,102 @@ withDefaults(
 .comments-loading {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .comments-loading__line {
-  height: 38px;
-  border-radius: 8px;
+  height: 42px;
+  border-radius: 10px;
 }
 
 .comments-loading__line--wide {
-  width: 82%;
-  height: 46px;
+  width: 76%;
+  height: 52px;
 }
 
 .comment-list {
   display: flex;
   flex-direction: column;
+  gap: 2px;
 }
 
 .comment {
-  padding: 14px 0;
-  border-top: 1px solid var(--line);
+  display: flex;
+  gap: 10px;
+  padding: 11px 8px;
+  border-radius: 12px;
+  transition: background 0.2s var(--ease);
 }
 
-.comment:first-child {
-  padding-top: 0;
-  border-top: 0;
+.comment:hover {
+  background: rgba(255, 255, 255, 0.04);
 }
 
-.comment:last-child {
-  padding-bottom: 0;
+.comment__avatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  color: #26102c;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, rgba(255, 158, 181, 0.9), rgba(185, 103, 255, 0.9));
+  border-radius: 50%;
+  box-shadow: 0 0 16px rgba(255, 158, 181, 0.14);
+}
+
+.comment__body {
+  flex: 1;
+  min-width: 0;
 }
 
 .comment__text {
   display: -webkit-box;
   overflow: hidden;
   color: var(--ink-2);
-  font-size: 0.8rem;
-  line-height: 1.75;
-  -webkit-line-clamp: 3;
+  font-size: 0.75rem;
+  line-height: 1.65;
   -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .comment__meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 5px 8px;
-  margin-top: 7px;
-  color: var(--muted);
-  font-family: var(--font-mono);
-  font-size: 0.58rem;
+  gap: 7px;
+  margin-top: 4px;
 }
 
 .comment__name {
-  color: var(--ink-2);
-  font-family: var(--font-sans);
+  color: var(--pink);
+  font-size: 0.62rem;
   font-weight: 600;
 }
 
+.comment__meta time {
+  color: var(--faint);
+  font-family: var(--font-mono);
+  font-size: 0.5rem;
+}
+
 .comment__post {
-  flex-basis: 100%;
+  display: flex;
+  align-items: center;
+  gap: 3px;
   max-width: 100%;
-  margin-top: 1px;
+  margin-top: 4px;
   overflow: hidden;
-  color: var(--violet);
+  color: var(--cyan);
+  font-size: 0.6rem;
   text-overflow: ellipsis;
   white-space: nowrap;
   transition: color 0.2s var(--ease);
 }
 
 .comment__post:hover {
-  color: var(--violet-strong);
+  color: var(--pink);
 }
 </style>

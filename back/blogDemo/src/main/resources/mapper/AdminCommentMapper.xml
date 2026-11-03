@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- namespace 必须和 Mapper 接口的全限定名一字不差 -->
+<mapper namespace="com.sangshen.mapper.Admin.AdminCommentMapper">
+
+    <select id="selectAdminComments"
+            resultType="com.sangshen.entity.admin.AdminCommentItem">
+        SELECT c.id,
+               c.post_id,
+               p.title as post_title,
+               c.nickname,
+               c.email,
+               c.website,
+               c.content,
+               c.status,
+               c.ip,
+               c.created_at
+        FROM comments c
+        JOIN posts p ON p.id = c.post_id
+        <where>
+            <if test="status != null and status != ''">
+                AND c.status = #{status}
+            </if>
+            <if test="postId != null">
+                AND c.post_id = #{postId}
+            </if>
+        </where>
+        ORDER BY c.created_at DESC, c.id DESC
+    </select>
+
+</mapper>

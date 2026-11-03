@@ -1,35 +1,22 @@
-<script setup lang="ts">
+<script setup>
 import EmptyState from '@/components/EmptyState.vue'
 import ErrorState from '@/components/ErrorState.vue'
 import Pagination from '@/components/Pagination.vue'
-import type { PublicComment } from '@/api/types'
 import { formatCommentDate, toDateTimeAttr } from '@/utils/date'
 import { getInitial, safeHttpUrl } from '@/utils/url'
 
-withDefaults(
-  defineProps<{
-    comments: PublicComment[]
-    loading?: boolean
-    error?: string
-    total?: number
-    page?: number
-    pageSize?: number
-  }>(),
-  {
-    loading: false,
-    error: '',
-    total: 0,
-    page: 1,
-    pageSize: 10,
-  },
-)
+defineProps({
+  comments: { type: Array, default: () => [] },
+  loading: { type: Boolean, default: false },
+  error: { type: String, default: '' },
+  total: { type: Number, default: 0 },
+  page: { type: Number, default: 1 },
+  pageSize: { type: Number, default: 10 },
+})
 
-const emit = defineEmits<{
-  retry: []
-  'page-change': [page: number]
-}>()
+const emit = defineEmits(['retry', 'page-change'])
 
-function websiteOf(comment: PublicComment): string {
+function websiteOf(comment) {
   return safeHttpUrl(comment.website)
 }
 </script>
@@ -38,9 +25,9 @@ function websiteOf(comment: PublicComment): string {
   <div class="comment-list">
     <div v-if="loading" class="comments-loading" aria-busy="true" aria-live="polite">
       <span class="sr-only">正在加载留言…</span>
-      <span class="skeleton comments-loading__line" />
-      <span class="skeleton comments-loading__line comments-loading__line--wide" />
-      <span class="skeleton comments-loading__line" />
+      <span class="skeleton comments-loading__item" />
+      <span class="skeleton comments-loading__item" />
+      <span class="skeleton comments-loading__item comments-loading__item--short" />
     </div>
 
     <ErrorState
@@ -60,7 +47,8 @@ function websiteOf(comment: PublicComment): string {
 
     <template v-else>
       <ul class="comments">
-        <li v-for="comment in comments" :key="comment.id" class="comment">
+        <li v-for="comment in comments" :key="comment.id" class="comment glass-card">
+          <span class="comment__quote" aria-hidden="true">“</span>
           <span class="comment__avatar" aria-hidden="true">
             {{ getInitial(comment.nickname) }}
           </span>
@@ -78,6 +66,7 @@ function websiteOf(comment: PublicComment): string {
               </a>
               <span v-else class="comment__name">{{ comment.nickname }}</span>
 
+              <span class="comment__dot" aria-hidden="true">·</span>
               <time
                 v-if="comment.createdAt"
                 class="comment__time"
@@ -106,52 +95,63 @@ function websiteOf(comment: PublicComment): string {
 .comments-loading {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 11px;
 }
 
-.comments-loading__line {
-  height: 46px;
-  border-radius: 10px;
+.comments-loading__item {
+  height: 82px;
+  border-radius: 14px;
 }
 
-.comments-loading__line--wide {
-  width: 76%;
-  height: 56px;
+.comments-loading__item--short {
+  width: 78%;
 }
 
 .comments {
   display: flex;
   flex-direction: column;
+  gap: 10px;
 }
 
 .comment {
+  position: relative;
   display: flex;
-  gap: 13px;
-  padding: 18px 0;
-  border-top: 1px solid var(--line);
+  gap: 12px;
+  padding: 16px;
+  overflow: hidden;
+  border-radius: 16px;
 }
 
-.comment:first-child {
-  padding-top: 0;
-  border-top: 0;
+.comment__quote {
+  position: absolute;
+  top: -10px;
+  right: 12px;
+  color: rgba(255, 158, 181, 0.12);
+  font-family: Georgia, serif;
+  font-size: 4.2rem;
+  line-height: 1;
+  pointer-events: none;
 }
 
 .comment__avatar {
   display: grid;
   place-items: center;
   flex: none;
-  width: 36px;
-  height: 36px;
-  color: var(--violet);
+  width: 38px;
+  height: 38px;
+  color: #25102b;
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  background: var(--violet-soft);
-  border: 1px solid var(--line);
+  background: linear-gradient(135deg, rgba(255, 158, 181, 0.9), rgba(185, 103, 255, 0.85));
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 50%;
+  box-shadow: 0 0 18px rgba(255, 158, 181, 0.15);
 }
 
 .comment__body {
+  position: relative;
+  z-index: 1;
   flex: 1;
   min-width: 0;
 }
@@ -160,35 +160,50 @@ function websiteOf(comment: PublicComment): string {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 6px 10px;
-  margin-bottom: 4px;
+  gap: 4px 7px;
+  margin-bottom: 5px;
 }
 
 .comment__name {
   color: var(--ink);
-  font-size: 0.82rem;
+  font-size: 0.76rem;
   font-weight: 600;
 }
 
 .comment__name--link {
+  color: var(--pink);
   transition: color 0.2s var(--ease);
 }
 
 .comment__name--link:hover {
-  color: var(--violet);
+  color: var(--cyan);
 }
 
+.comment__dot,
 .comment__time {
-  color: var(--muted);
+  color: var(--faint);
   font-family: var(--font-mono);
-  font-size: 0.6rem;
+  font-size: 0.55rem;
 }
 
 .comment__content {
   color: var(--ink-2);
-  font-size: 0.86rem;
+  font-size: 0.8rem;
   line-height: 1.8;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+}
+
+@media (max-width: 560px) {
+  .comment {
+    padding: 14px;
+    gap: 9px;
+  }
+
+  .comment__avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 0.62rem;
+  }
 }
 </style>

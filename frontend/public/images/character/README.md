@@ -1,23 +1,38 @@
 # 角色插画放置说明
 
-把动漫人物插画放在本目录，然后在 `src/config/site.ts` 里设置：
+当前看板娘使用本目录下的 **`starNight.png`**，并在 `src/config/site.js` 中配置：
 
-```ts
-characterImage: '/images/character/hero.webp',
+```js
+characterImage: '/images/character/starNight.png',
+avatarImage: '/images/character/starNight.png',
+characterAlt: 'Start Night 的紫发少女看板娘',
 ```
 
-首屏右侧的 `CharacterArt` 组件会自动切换为图片；图片加载失败或留空时，会显示内置的夜空占位图。
+同一个形象会用在：Hero、登录页、Header 小头像、Footer 小头像、About 头像位。
+替换时可以直接覆盖 `starNight.png`，或者换文件名后同步修改 `src/config/site.js`。
 
-## 建议规格
+## 当前图片规格
 
-- 比例：3:4 或 4:5（竖图），首屏容器按右侧高度裁切
-- 尺寸：1200 × 1600 以内，WebP/AVIF，建议 < 400KB
-- 构图：人物脸部放在画面上方 1/3，底部留出空间，避免重要元素贴边
-- 背景：透明 PNG/WebP 或深色夜空背景都可以；透明图会透出首屏星空
-- 不放进 `src/assets`：这个目录在 `public` 下，构建后会原样复制到站点根路径
+- 尺寸：1225 × 1284
+- 背景：透明 PNG
+- 建议：保持竖图 / 近方图，人物脸部在上半部分
+- 可优化为 WebP 以减小体积
 
-侧栏小头像同理，放到本目录后设置：
+## 导航悬浮小人
 
-```ts
-avatarImage: '/images/character/avatar.webp',
-```
+`src/config/navigation.js` 的 `hoverImg` 使用 `nav/` 下的缩略图：
+
+| 导航 | 原图 | 使用的缩略图 |
+|---|---|---|
+| 首页 | `home.png` | `nav/home.webp` |
+| 文章 | `post.png` | `nav/post.webp` |
+| 友链 | `friend_link.png` | `nav/friend-link.webp` |
+| 关于 | `guanyu.png` | `nav/guanyu.webp` |
+
+导航显示尺寸只有 80px，原图约 1.7～2.2MB；不要把四张原图直接一次性预加载。`nav/` 下的 WebP 是 220px 高的缩略图，四张合计约 86KB。替换原图后重新生成 `nav/` 缩略图即可。
+
+## 放置位置
+
+- 图片放在 `public/images/character/`
+- 该目录构建后会原样复制到站点根路径，不走 Vite 打包
+- 图片加载失败时会回退到内置夜空占位

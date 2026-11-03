@@ -1,6 +1,6 @@
 package com.sangshen.controller;
 
-import com.sangshen.Service.PostService;
+import com.sangshen.service.PostService;
 import com.sangshen.entity.*;
 import com.sangshen.entity.dto.PostDetail;
 import com.sangshen.entity.dto.PublicComment;

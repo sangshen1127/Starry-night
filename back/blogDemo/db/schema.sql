@@ -104,10 +104,10 @@ VALUES
 
 INSERT INTO comments (post_id, nickname, content, status, created_at)
 VALUES
-    (1, '小明', '写得好', 'approved', NOW()),
-    (1, '小红', '学到了', 'approved', NOW()),
-    (1, '路人', '这篇不行', 'pending', NOW()),
-    (1, '广告机', '加微信 xxx', 'spam', NOW());
+    (2, '小明', '写得好', 'approved', NOW()),
+    (2, '小红', '学到了', 'approved', NOW()),
+    (2, '路人', '这篇不行', 'pending', NOW()),
+    (2, '广告机', '加微信 xxx', 'spam', NOW());
 
 INSERT INTO friend_links (name, url, avatar_url, description, sort_order, visible)
 VALUES

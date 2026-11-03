@@ -1,21 +1,13 @@
-<script setup lang="ts">
+<script setup>
 import { computed, ref, watch } from 'vue'
 import { resolveAssetUrl } from '@/utils/url'
 
-const props = withDefaults(
-  defineProps<{
-    src?: string | null
-    alt?: string
-    loading?: 'lazy' | 'eager'
-    tone?: number
-  }>(),
-  {
-    src: '',
-    alt: '',
-    loading: 'lazy',
-    tone: 0,
-  },
-)
+const props = defineProps({
+  src: { type: String, default: '' },
+  alt: { type: String, default: '' },
+  loading: { type: String, default: 'lazy' },
+  tone: { type: Number, default: 0 },
+})
 
 const failed = ref(false)
 const imageSrc = computed(() => resolveAssetUrl(props.src))
@@ -30,12 +22,14 @@ watch(
 </script>
 
 <template>
-  <div class="cover-image">
-    <div class="cover-image__fallback" :class="toneClass" aria-hidden="true">
+  <div class="cover-image" :class="toneClass">
+    <div class="cover-image__fallback" aria-hidden="true">
+      <span class="cover-image__halo" />
       <span class="cover-image__moon" />
       <span class="cover-image__star cover-image__star--one" />
       <span class="cover-image__star cover-image__star--two" />
       <span class="cover-image__star cover-image__star--three" />
+      <span class="cover-image__grid" />
     </div>
 
     <img
@@ -55,97 +49,149 @@ watch(
   position: relative;
   width: 100%;
   height: 100%;
+  min-height: 100%;
   overflow: hidden;
-  background: var(--night-1);
-}
-
-.cover-image::after {
-  position: absolute;
-  inset: 12px;
-  z-index: 1;
-  content: '';
-  pointer-events: none;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 2px;
+  background: #161025;
+  border-radius: inherit;
 }
 
 .cover-image__fallback {
   position: absolute;
   inset: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 72% 22%, rgba(255, 158, 181, 0.18), transparent 44%),
+    radial-gradient(circle at 22% 86%, rgba(126, 200, 227, 0.1), transparent 48%),
+    linear-gradient(145deg, #1b1230, #27173f 52%, #211532);
 }
 
-.tone-0 {
-  background:
-    radial-gradient(320px 220px at 76% 18%, rgba(244, 213, 141, 0.13), transparent 68%),
-    linear-gradient(135deg, #0b1020 0%, #1c2442 56%, #3b3766 100%);
-}
-
-.tone-1 {
-  background:
-    radial-gradient(300px 220px at 22% 22%, rgba(100, 84, 200, 0.24), transparent 68%),
-    linear-gradient(135deg, #111827 0%, #273349 56%, #464f6d 100%);
-}
-
-.tone-2 {
-  background:
-    radial-gradient(320px 240px at 82% 72%, rgba(196, 121, 142, 0.18), transparent 70%),
-    linear-gradient(135deg, #14101f 0%, #2a223a 56%, #4b3a54 100%);
-}
-
-.tone-3 {
-  background:
-    radial-gradient(300px 220px at 20% 18%, rgba(126, 159, 167, 0.2), transparent 68%),
-    linear-gradient(135deg, #0d1620 0%, #172936 56%, #354c55 100%);
+.cover-image__halo {
+  position: absolute;
+  top: 20%;
+  left: 60%;
+  width: 68%;
+  aspect-ratio: 1;
+  background: radial-gradient(circle, rgba(255, 158, 181, 0.18), transparent 68%);
+  border-radius: 50%;
+  filter: blur(14px);
+  transform: translateX(-50%);
 }
 
 .cover-image__moon {
   position: absolute;
   top: 24%;
-  right: 20%;
-  width: 64px;
-  height: 64px;
-  background: radial-gradient(circle at 34% 32%, #fff8e6 0%, #f2dcae 58%, #d5b679 100%);
+  left: 58%;
+  width: 30%;
+  aspect-ratio: 1;
+  background: linear-gradient(145deg, #fff4ed, #ffc6dc);
   border-radius: 50%;
-  box-shadow: 0 0 42px rgba(244, 213, 141, 0.24);
-  opacity: 0.82;
+  box-shadow:
+    0 0 22px rgba(255, 214, 231, 0.55),
+    inset -8px -5px 0 rgba(185, 103, 255, 0.12);
+  transform: translateX(-50%);
 }
 
 .cover-image__star {
   position: absolute;
-  width: 3px;
-  height: 3px;
-  background: rgba(255, 255, 255, 0.65);
+  width: 4px;
+  height: 4px;
+  background: #fff;
   border-radius: 50%;
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 9px rgba(255, 255, 255, 0.8);
 }
 
 .cover-image__star--one {
-  top: 24%;
-  left: 22%;
+  top: 18%;
+  left: 24%;
 }
 
 .cover-image__star--two {
   top: 64%;
-  left: 72%;
-  width: 2px;
-  height: 2px;
+  left: 78%;
+  width: 3px;
+  height: 3px;
+  background: var(--cyan);
 }
 
 .cover-image__star--three {
   top: 76%;
-  left: 30%;
+  left: 22%;
   width: 2px;
   height: 2px;
-  opacity: 0.7;
+  background: var(--pink);
+}
+
+.cover-image__grid {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.2) 0.5px, transparent 0.5px);
+  background-size: 5px 5px;
+  opacity: 0.08;
 }
 
 .cover-image__img {
   position: absolute;
   inset: 0;
-  z-index: 1;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.6s var(--ease);
+  object-position: center;
+  transition: transform 0.5s var(--ease);
+}
+
+.cover-image:hover .cover-image__img {
+  transform: scale(1.04);
+}
+
+.tone-1 .cover-image__fallback {
+  background:
+    radial-gradient(circle at 74% 20%, rgba(126, 200, 227, 0.18), transparent 44%),
+    radial-gradient(circle at 20% 84%, rgba(255, 158, 181, 0.12), transparent 48%),
+    linear-gradient(145deg, #111c31, #1b2947 52%, #2b1b45);
+}
+
+.tone-1 .cover-image__moon {
+  left: 28%;
+  background: linear-gradient(145deg, #e6fbff, #9edcf0);
+  box-shadow:
+    0 0 22px rgba(126, 200, 227, 0.45),
+    inset -8px -5px 0 rgba(255, 158, 181, 0.12);
+}
+
+.tone-1 .cover-image__star--one {
+  left: 70%;
+}
+
+.tone-2 .cover-image__fallback {
+  background:
+    radial-gradient(circle at 70% 24%, rgba(185, 103, 255, 0.22), transparent 46%),
+    linear-gradient(145deg, #1d102d, #2a1648 54%, #151a35);
+}
+
+.tone-2 .cover-image__moon {
+  left: 44%;
+  width: 34%;
+  background: linear-gradient(145deg, #f7eaff, #d0a8ff);
+  box-shadow:
+    0 0 24px rgba(185, 103, 255, 0.48),
+    inset -8px -5px 0 rgba(126, 200, 227, 0.12);
+}
+
+.tone-3 .cover-image__fallback {
+  background:
+    radial-gradient(circle at 22% 22%, rgba(255, 158, 181, 0.16), transparent 44%),
+    radial-gradient(circle at 78% 76%, rgba(126, 200, 227, 0.12), transparent 48%),
+    linear-gradient(145deg, #23152c, #301d45 52%, #171b34);
+}
+
+.tone-3 .cover-image__moon {
+  top: 32%;
+  left: 34%;
+  width: 26%;
+  background: linear-gradient(145deg, #fff3fa, #ffb8d0);
+}
+
+.tone-3 .cover-image__star--two {
+  left: 30%;
 }
 </style>

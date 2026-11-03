@@ -1,19 +1,11 @@
-<script setup lang="ts">
-withDefaults(
-  defineProps<{
-    title?: string
-    message: string
-    compact?: boolean
-  }>(),
-  {
-    title: '夜色暂时断线了',
-    compact: false,
-  },
-)
+<script setup>
+defineProps({
+  title: { type: String, default: '夜色暂时断线了' },
+  message: { type: String, required: true },
+  compact: { type: Boolean, default: false },
+})
 
-const emit = defineEmits<{
-  retry: []
-}>()
+const emit = defineEmits(['retry'])
 </script>
 
 <template>
@@ -31,27 +23,33 @@ const emit = defineEmits<{
 
 <style scoped>
 .error-state {
+  position: relative;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 14px 18px;
-  padding: 24px 26px;
-  background: var(--surface);
-  border: 1px solid var(--line);
+  overflow: hidden;
+  padding: 22px 24px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 158, 181, 0.16);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--glass-shadow);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
 }
 
 .error-state__mark {
   display: grid;
   place-items: center;
   flex: none;
-  width: 38px;
-  height: 38px;
-  color: var(--gold);
-  background: var(--gold-soft);
+  width: 42px;
+  height: 42px;
+  color: var(--pink);
+  font-size: 1.1rem;
+  background: rgba(255, 158, 181, 0.08);
+  border: 1px solid rgba(255, 158, 181, 0.16);
   border-radius: 50%;
-  font-size: 1rem;
+  box-shadow: 0 0 22px rgba(255, 158, 181, 0.12);
 }
 
 .error-state__copy {
@@ -61,48 +59,58 @@ const emit = defineEmits<{
 
 .error-state__title {
   color: var(--ink);
-  font-size: 0.9rem;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 400;
 }
 
 .error-state__message {
   margin-top: 3px;
   color: var(--muted);
-  font-size: 0.78rem;
+  font-size: 0.72rem;
   line-height: 1.7;
 }
 
 .error-state__retry {
-  min-height: 36px;
-  padding: 7px 16px;
-  font-size: 0.76rem;
+  min-height: 34px;
+  padding: 7px 15px;
+  font-size: 0.66rem;
 }
 
 .error-state--compact {
+  padding: 14px;
   gap: 10px;
-  padding: 0;
-  background: transparent;
-  border: 0;
-  box-shadow: none;
+  border-radius: 13px;
 }
 
 .error-state--compact .error-state__mark {
-  width: 26px;
-  height: 26px;
-  font-size: 0.76rem;
+  width: 32px;
+  height: 32px;
+  font-size: 0.85rem;
 }
 
 .error-state--compact .error-state__title {
-  font-size: 0.8rem;
+  font-size: 0.82rem;
 }
 
 .error-state--compact .error-state__message {
-  font-size: 0.72rem;
+  font-size: 0.66rem;
 }
 
 .error-state--compact .error-state__retry {
-  min-height: 30px;
-  padding: 4px 12px;
-  font-size: 0.7rem;
+  min-height: 29px;
+  padding: 5px 11px;
+  font-size: 0.6rem;
+}
+
+@media (max-width: 560px) {
+  .error-state {
+    align-items: flex-start;
+    padding: 16px;
+  }
+
+  .error-state__retry {
+    margin-left: 52px;
+  }
 }
 </style>

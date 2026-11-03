@@ -1,7 +1,7 @@
 package com.sangshen.controller;
 
 
-import com.sangshen.Service.HomeService;
+import com.sangshen.service.HomeService;
 import com.sangshen.entity.Result;
 import com.sangshen.entity.dto.Home;
 import lombok.RequiredArgsConstructor;

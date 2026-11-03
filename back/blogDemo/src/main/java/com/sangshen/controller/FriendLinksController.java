@@ -1,7 +1,6 @@
 package com.sangshen.controller;
 
-import com.sangshen.Service.FriendLinkService;
-import com.sangshen.entity.FriendLink;
+import com.sangshen.service.FriendLinkService;
 import com.sangshen.entity.Result;
 import com.sangshen.entity.dto.FriendLinkDto;
 import lombok.RequiredArgsConstructor;

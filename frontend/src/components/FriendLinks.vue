@@ -1,22 +1,15 @@
-<script setup lang="ts">
+<script setup>
 import { computed, reactive } from 'vue'
 import EmptyState from '@/components/EmptyState.vue'
-import type { FriendLink } from '@/api/types'
 import { getInitial, resolveAssetUrl, safeHttpUrl } from '@/utils/url'
 
-const props = withDefaults(
-  defineProps<{
-    links: FriendLink[]
-    loading?: boolean
-    error?: string
-  }>(),
-  {
-    loading: false,
-    error: '',
-  },
-)
+const props = defineProps({
+  links: { type: Array, default: () => [] },
+  loading: { type: Boolean, default: false },
+  error: { type: String, default: '' },
+})
 
-const failedAvatars = reactive<Record<number, boolean>>({})
+const failedAvatars = reactive({})
 
 const friends = computed(() =>
   props.links
@@ -77,6 +70,7 @@ const friends = computed(() =>
               {{ friend.description }}
             </span>
           </span>
+          <span class="friend__arrow" aria-hidden="true">↗</span>
         </a>
       </li>
     </ul>
@@ -90,20 +84,20 @@ const friends = computed(() =>
 
 <style scoped>
 .friends-loading {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .friends-loading__item {
-  height: 54px;
+  height: 50px;
   border-radius: 10px;
 }
 
 .friend-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .friend {
@@ -111,13 +105,16 @@ const friends = computed(() =>
   align-items: center;
   gap: 9px;
   min-width: 0;
-  padding: 8px;
+  padding: 7px 8px;
   border-radius: 12px;
-  transition: background 0.2s var(--ease);
+  transition:
+    background 0.2s var(--ease),
+    transform 0.2s var(--ease);
 }
 
 .friend:hover {
-  background: var(--violet-soft);
+  background: rgba(255, 158, 181, 0.07);
+  transform: translateX(2px);
 }
 
 .friend__avatar {
@@ -128,13 +125,14 @@ const friends = computed(() =>
   width: 34px;
   height: 34px;
   overflow: hidden;
-  color: var(--violet);
+  color: #25102b;
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 0.66rem;
   font-weight: 700;
-  background: var(--violet-soft);
-  border: 1px solid var(--line);
+  background: linear-gradient(135deg, rgba(255, 158, 181, 0.88), rgba(126, 200, 227, 0.75));
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 50%;
+  box-shadow: 0 0 16px rgba(185, 103, 255, 0.12);
 }
 
 .friend__initial {
@@ -154,14 +152,15 @@ const friends = computed(() =>
 .friend__copy {
   display: flex;
   flex-direction: column;
+  flex: 1;
   min-width: 0;
-  line-height: 1.35;
+  gap: 2px;
 }
 
 .friend__name {
   overflow: hidden;
   color: var(--ink-2);
-  font-size: 0.76rem;
+  font-size: 0.72rem;
   font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -169,26 +168,40 @@ const friends = computed(() =>
 
 .friend__desc {
   overflow: hidden;
-  margin-top: 2px;
-  color: var(--muted);
-  font-size: 0.6rem;
+  color: var(--faint);
+  font-size: 0.55rem;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.friend__arrow {
+  color: var(--faint);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  transition:
+    color 0.2s var(--ease),
+    transform 0.2s var(--ease);
+}
+
+.friend:hover .friend__arrow {
+  color: var(--pink);
+  transform: translate(2px, -2px);
 }
 
 .friends-more {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  margin-top: 14px;
-  padding-top: 12px;
-  color: var(--violet);
-  font-size: 0.7rem;
-  border-top: 1px solid var(--line);
+  gap: 5px;
+  margin-top: 12px;
+  padding-top: 11px;
+  color: var(--pink);
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
   transition: color 0.2s var(--ease);
 }
 
 .friends-more:hover {
-  color: var(--violet-strong);
+  color: var(--cyan);
 }
 </style>

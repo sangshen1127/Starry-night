@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<script setup>
 const stars = Array.from({ length: 32 }, (_, index) => ({
   left: `${(index * 37 + 9) % 100}%`,
   top: `${(index * 53 + 5) % 92}%`,
